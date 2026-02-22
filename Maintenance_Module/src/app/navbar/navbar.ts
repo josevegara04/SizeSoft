@@ -10,16 +10,16 @@ import { filter } from 'rxjs/operators';
 })
 export class Navbar implements OnInit {
   private readonly router = inject(Router);
-  protected readonly showMantenimientoSubmenu = signal(false);
+  protected readonly isMantenimientoActive = signal(false);
 
   ngOnInit(): void {
-    this.updateMantenimientoSubmenu();
+    this.updateMantenimientoActive();
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-      .subscribe(() => this.updateMantenimientoSubmenu());
+      .subscribe(() => this.updateMantenimientoActive());
   }
 
-  private updateMantenimientoSubmenu(): void {
-    this.showMantenimientoSubmenu.set(this.router.url.startsWith('/mantenimiento'));
+  private updateMantenimientoActive(): void {
+    this.isMantenimientoActive.set(this.router.url.startsWith('/mantenimiento'));
   }
 }

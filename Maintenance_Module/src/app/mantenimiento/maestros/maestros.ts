@@ -1,27 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-maestros',
   standalone: true,
-  template: `
-    <div class="submodule">
-      <h2>Maestros</h2>
-      <p>Contenido de Maestros — en desarrollo.</p>
-    </div>
-  `,
-  styles: [
-    `
-      .submodule {
-        padding: 24px;
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        margin: 16px;
-      }
-      .submodule h2 {
-        color: #1a237e;
-        margin-bottom: 16px;
-      }
-    `,
-  ],
+  imports: [RouterOutlet],
+  template: `<router-outlet></router-outlet>`,
 })
 export class MaestrosComponent {}

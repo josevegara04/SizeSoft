@@ -1,20 +1,26 @@
-<div class="nav-wrapper">
-  <nav class="navbar">
-    <a class="nav-item disabled" href="#">Dashboard</a>
-    <a class="nav-item disabled" href="#">Administrativo</a>
-    <a class="nav-item disabled" href="#">Contable</a>
-    <a class="nav-item disabled" href="#">POS</a>
-    <a class="nav-item disabled" href="#">Producción</a>
-    <a class="nav-item disabled" href="#">Inventario</a>
-    <a class="nav-item disabled" href="#">Generales</a>
-    <a class="nav-item disabled" href="#">Reportes</a>
-    <a class="nav-item" routerLink="/mantenimiento" routerLinkActive="active">Mantenimiento</a>
-    <a class="nav-item disabled" href="#">Salir</a>
-  </nav>
-  @if (showMantenimientoSubmenu()) {
-    <nav class="subnavbar">
-      <a class="subnav-item" routerLink="/mantenimiento/maestros" routerLinkActive="active">Maestros</a>
-      <a class="subnav-item" routerLink="/mantenimiento/transacciones" routerLinkActive="active">Transacciones</a>
-    </nav>
-  }
-</div>
+<nav class="navbar">
+  <a class="nav-item disabled" href="#">Dashboard</a>
+  <a class="nav-item disabled" href="#">Administrativo</a>
+  <a class="nav-item disabled" href="#">Contable</a>
+  <a class="nav-item disabled" href="#">POS</a>
+  <a class="nav-item disabled" href="#">Producción</a>
+  <a class="nav-item disabled" href="#">Inventario</a>
+  <a class="nav-item disabled" href="#">Generales</a>
+  <a class="nav-item disabled" href="#">Reportes</a>
+
+  <div class="nav-item dropdown" [class.active]="isMantenimientoActive()">
+    <button type="button" class="nav-item-trigger">Mantenimiento ▾</button>
+    <div class="dropdown-panel">
+      <div class="dropdown-item has-submenu">
+        <span>Maestros ▸</span>
+        <div class="submenu-panel">
+          <a class="submenu-item" routerLink="/mantenimiento/maestros/maquinas-equipos-localidades" routerLinkActive="active">Máquinas, equipos y localidades</a>
+          <a class="submenu-item" routerLink="/mantenimiento/maestros/repuestos" routerLinkActive="active">Repuestos</a>
+        </div>
+      </div>
+      <a class="dropdown-item" routerLink="/mantenimiento/transacciones" routerLinkActive="active">Transacciones</a>
+    </div>
+  </div>
+
+  <a class="nav-item disabled" href="#">Salir</a>
+</nav>

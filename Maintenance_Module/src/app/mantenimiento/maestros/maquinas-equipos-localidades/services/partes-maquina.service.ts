@@ -78,3 +78,4 @@ export class PartesMaquinaService {
         this.saveAll(filtered);
     }
 }
+//loca hpta

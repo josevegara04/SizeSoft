@@ -23,6 +23,13 @@ export class MaquinasEquiposLocalidadesComponent {
   // Part form
   newPart = { nombreParte: '', codigoParte: '' };
 
+  // Inline edit
+  editingPartId: string | null = null;
+  editForm = { nombreParte: '', codigoParte: '' };
+
+  // Delete confirmation
+  deleteConfirm: ParteMaquina | null = null;
+
   // Parts list
   partes: ParteMaquina[] = [];
 
@@ -46,6 +53,7 @@ export class MaquinasEquiposLocalidadesComponent {
     this.showDropdown = false;
     this.filteredMaquinas = [];
     this.notification = null;
+    this.editingPartId = null;
     this.loadPartes();
   }
 
@@ -53,6 +61,8 @@ export class MaquinasEquiposLocalidadesComponent {
     this.selectedMaquina = null;
     this.partes = [];
     this.newPart = { nombreParte: '', codigoParte: '' };
+    this.editingPartId = null;
+    this.deleteConfirm = null;
     this.notification = null;
   }
 
@@ -93,10 +103,53 @@ export class MaquinasEquiposLocalidadesComponent {
     }
   }
 
-  deletePart(partId: string): void {
-    this.partesService.delete(partId);
+  // ─── Inline Edit ─────────────────────────────────
+
+  startEdit(parte: ParteMaquina): void {
+    this.editingPartId = parte.id;
+    this.editForm = { nombreParte: parte.nombreParte, codigoParte: parte.codigoParte };
+    this.notification = null;
+  }
+
+  saveEdit(): void {
+    if (!this.editingPartId) return;
+
+    const result = this.partesService.update(
+      this.editingPartId,
+      this.editForm.nombreParte,
+      this.editForm.codigoParte
+    );
+
+    if (result.success) {
+      this.editingPartId = null;
+      this.loadPartes();
+      this.showNotification('success', `Parte "${result.part!.nombreParte}" actualizada exitosamente.`);
+    } else {
+      this.showNotification('error', result.error!);
+    }
+  }
+
+  cancelEdit(): void {
+    this.editingPartId = null;
+  }
+
+  // ─── Delete with Confirmation ────────────────────
+
+  confirmDelete(parte: ParteMaquina): void {
+    this.deleteConfirm = parte;
+  }
+
+  executeDelete(): void {
+    if (!this.deleteConfirm) return;
+    const name = this.deleteConfirm.nombreParte;
+    this.partesService.delete(this.deleteConfirm.id);
+    this.deleteConfirm = null;
     this.loadPartes();
-    this.showNotification('success', 'Parte eliminada exitosamente.');
+    this.showNotification('success', `Parte "${name}" eliminada exitosamente.`);
+  }
+
+  cancelDelete(): void {
+    this.deleteConfirm = null;
   }
 
   // ─── Helpers ─────────────────────────────────────

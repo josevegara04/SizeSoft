@@ -64,6 +64,36 @@ export class PartesMaquinaService {
         return { success: true, part: newPart };
     }
 
+    update(partId: string, nombreParte: string, codigoParte: string): { success: boolean; error?: string; part?: ParteMaquina } {
+        // Validate required fields
+        if (!nombreParte.trim()) {
+            return { success: false, error: 'El nombre de la parte es obligatorio.' };
+        }
+        if (!codigoParte.trim()) {
+            return { success: false, error: 'El código de la parte es obligatorio.' };
+        }
+
+        const all = this.getAll();
+        const idx = all.findIndex((p) => p.id === partId);
+        if (idx === -1) {
+            return { success: false, error: 'La parte no fue encontrada.' };
+        }
+
+        const part = all[idx];
+
+        // Validate uniqueness (machineId + partCode) excluding current part
+        const duplicate = all.find(
+            (p) => p.id !== partId && p.maquinaId === part.maquinaId && p.codigoParte.toLowerCase() === codigoParte.trim().toLowerCase()
+        );
+        if (duplicate) {
+            return { success: false, error: `Ya existe una parte con el código "${codigoParte}" para esta máquina.` };
+        }
+
+        all[idx] = { ...part, nombreParte: nombreParte.trim(), codigoParte: codigoParte.trim() };
+        this.saveAll(all);
+        return { success: true, part: all[idx] };
+    }
+
     delete(partId: string): boolean {
         const all = this.getAll();
         const filtered = all.filter((p) => p.id !== partId);
@@ -78,4 +108,3 @@ export class PartesMaquinaService {
         this.saveAll(filtered);
     }
 }
-//loca hpta

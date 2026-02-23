@@ -125,17 +125,41 @@
         </thead>
         <tbody>
           @for (parte of partes; track parte.id; let i = $index) {
+          @if (editingPartId === parte.id) {
+          <!-- INLINE EDIT ROW -->
+          <tr class="editing-row">
+            <td class="col-num">{{ i + 1 }}</td>
+            <td>
+              <input type="text" class="inline-input" [(ngModel)]="editForm.nombreParte"
+                placeholder="Nombre de la parte" />
+            </td>
+            <td>
+              <input type="text" class="inline-input" [(ngModel)]="editForm.codigoParte"
+                placeholder="Código de la parte" />
+            </td>
+            <td>{{ formatDate(parte.creadoEn) }}</td>
+            <td class="col-actions">
+              <div class="action-group">
+                <button class="btn-save-inline" title="Guardar cambios" (click)="saveEdit()">✔️</button>
+                <button class="btn-cancel-inline" title="Cancelar" (click)="cancelEdit()">✖️</button>
+              </div>
+            </td>
+          </tr>
+          } @else {
+          <!-- NORMAL ROW -->
           <tr>
             <td class="col-num">{{ i + 1 }}</td>
             <td>{{ parte.nombreParte }}</td>
             <td><code>{{ parte.codigoParte }}</code></td>
             <td>{{ formatDate(parte.creadoEn) }}</td>
             <td class="col-actions">
-              <button class="btn-delete" title="Eliminar parte" (click)="deletePart(parte.id)">
-                🗑️
-              </button>
+              <div class="action-group">
+                <button class="btn-edit" title="Editar parte" (click)="startEdit(parte)">✏️</button>
+                <button class="btn-delete" title="Eliminar parte" (click)="confirmDelete(parte)">🗑️</button>
+              </div>
             </td>
           </tr>
+          }
           }
         </tbody>
       </table>
@@ -145,4 +169,26 @@
     </div>
     }
   </div>
+
+  <!-- =================== CONFIRM DELETE MODAL =================== -->
+  @if (deleteConfirm) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-icon">⚠️</span>
+        <h3>Confirmar Eliminación</h3>
+      </div>
+      <p class="modal-message">
+        ¿Está seguro que desea eliminar la parte
+        <strong>"{{ deleteConfirm.nombreParte }}"</strong>
+        (código: <code>{{ deleteConfirm.codigoParte }}</code>)?
+      </p>
+      <p class="modal-warning">Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" (click)="cancelDelete()">Cancelar</button>
+        <button class="btn-modal-confirm" (click)="executeDelete()">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+  }
 </div>

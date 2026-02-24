@@ -1,1 +1,123 @@
-<p>buenas</p>
+<section class="maintenance-dashboard">
+  <header class="dashboard-header">
+    <h2 class="dashboard-title">Dashboard de Mantenimiento</h2>
+  </header>
+
+  <section class="filters">
+    <div class="filter-group">
+      <label class="filter-label" for="filter-machine-type">Tipo de máquina</label>
+      <select id="filter-machine-type" class="filter-select">
+        <option value="">Todas</option>
+        <option value="linea">Línea de producción</option>
+        <option value="empaque">Empaque</option>
+        <option value="servicios">Servicios auxiliares</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="filter-plant">Planta</label>
+      <select id="filter-plant" class="filter-select">
+        <option value="">Todas</option>
+        <option value="planta-1">Planta 1</option>
+        <option value="planta-2">Planta 2</option>
+        <option value="planta-3">Planta 3</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="filter-criticality">Criticidad</label>
+      <select id="filter-criticality" class="filter-select">
+        <option value="">Todas</option>
+        <option value="alta">Alta</option>
+        <option value="media">Media</option>
+        <option value="baja">Baja</option>
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <button type="button" class="btn btn-primary">Aplicar filtros</button>
+      <button type="button" class="btn btn-secondary">Limpiar</button>
+    </div>
+  </section>
+
+  <section class="kpi-row">
+    <article class="kpi-card">
+      <div class="kpi-label">Máquinas en riesgo alto</div>
+      <div class="kpi-value">12</div>
+      <div class="kpi-sub">En las últimas 4 semanas</div>
+      <span class="kpi-badge kpi-badge--high">Alerta</span>
+    </article>
+
+    <article class="kpi-card">
+      <div class="kpi-label">Riesgo promedio</div>
+      <div class="kpi-value">68%</div>
+      <div class="kpi-sub">Promedio general por planta</div>
+      <span class="kpi-badge kpi-badge--medium">Moderado</span>
+    </article>
+
+    <article class="kpi-card">
+      <div class="kpi-label">Máquinas críticas</div>
+      <div class="kpi-value">5</div>
+      <div class="kpi-sub">Requieren atención en &lt; 7 días</div>
+      <span class="kpi-badge kpi-badge--critical">Crítico</span>
+    </article>
+  </section>
+
+  <section class="content-row">
+    <article class="panel">
+      <header class="panel-header">Tabla priorizada por riesgo</header>
+      <div class="panel-body">
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Máquina</th>
+              <th>Planta</th>
+              <th>Riesgo</th>
+              <th>Prob. falla</th>
+              <th>Próximo mantenimiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Línea Empaque 01</td>
+              <td>Planta 1</td>
+              <td><span class="risk-tag risk-tag--high">Alto</span></td>
+              <td>82%</td>
+              <td>En 3 días</td>
+            </tr>
+            <tr>
+              <td>Compresor principal</td>
+              <td>Planta 2</td>
+              <td><span class="risk-tag risk-tag--high">Alto</span></td>
+              <td>76%</td>
+              <td>En 5 días</td>
+            </tr>
+            <tr>
+              <td>Línea Corte 02</td>
+              <td>Planta 1</td>
+              <td><span class="risk-tag risk-tag--medium">Medio</span></td>
+              <td>61%</td>
+              <td>En 10 días</td>
+            </tr>
+            <tr>
+              <td>Caldera secundaria</td>
+              <td>Planta 3</td>
+              <td><span class="risk-tag risk-tag--low">Bajo</span></td>
+              <td>35%</td>
+              <td>En 18 días</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="panel">
+      <header class="panel-header">Gráfico de tendencia (línea)</header>
+      <div class="panel-body">
+        <div class="chart-placeholder">
+          Aquí irá el gráfico de tendencia de riesgo por periodo.
+        </div>
+      </div>
+    </article>
+  </section>
+</section>

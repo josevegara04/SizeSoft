@@ -1,18 +1,20 @@
-import pandas as pd
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
+# test.py
 
-data = pd.read_csv("dataset_balanceado.csv")
+import joblib
+from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
 
-X = data.drop(columns=["fallo"])
-y = data["fallo"]
+# 1. Cargar modelo
+model = joblib.load("modelo.pkl")
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+# 2. Cargar test ya separado
+X_test, y_test = joblib.load("test_data.pkl")
 
-model = RandomForestClassifier()
-model.fit(X_train, y_train)
-pred = model.predict(X_test)
+# 3. Predecir
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
 
-print(classification_report(y_test, pred))
+print("=== EVALUACIÓN DESDE TEST.PY ===")
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("AUC:", roc_auc_score(y_test, y_prob))
+print("\nClassification report:\n")
+print(classification_report(y_test, y_pred))

@@ -3,55 +3,88 @@ import pandas as pd
 
 np.random.seed(42)
 
+# Número total de registros simulados
 n = 4000
 tipos = 5
+horizonte_dias = 30
 
 data_list = []
 
+# Tasa base de fallo en 30 días por tipo de máquina
+# (valores razonables, pero ajustables si quieres)
+base_failure_rate = {
+    1: 0.03,  # máquinas poco críticas / ligeras
+    2: 0.06,
+    3: 0.05,
+    4: 0.10,  # muy críticas
+    5: 0.12,
+}
+
 for tipo in range(1, tipos + 1):
+    size = n // tipos
 
-    # Cada tipo tiene un perfil diferente
-    if tipo == 1:  # maquinaria ligera
-        horas_uso = np.random.randint(100, 2500, n // tipos)
-        horas_por_dia = np.random.uniform(4, 10, n // tipos)
-        criticidad = np.random.choice([1,2], n // tipos, p=[0.7,0.3])
+    # --- Perfil de uso y criticidad por tipo de máquina ---
+    if tipo == 1:
+        horas_uso = np.random.randint(200, 2500, size)
+        horas_por_dia = np.random.uniform(4, 10, size)
+        criticidad = np.random.choice([1, 2], size, p=[0.7, 0.3])
 
-    elif tipo == 2:  # maquinaria pesada
-        horas_uso = np.random.randint(1000, 6000, n // tipos)
-        horas_por_dia = np.random.uniform(8, 20, n // tipos)
-        criticidad = np.random.choice([2,3], n // tipos, p=[0.4,0.6])
+    elif tipo == 2:
+        horas_uso = np.random.randint(1000, 6000, size)
+        horas_por_dia = np.random.uniform(8, 20, size)
+        criticidad = np.random.choice([2, 3], size, p=[0.4, 0.6])
 
-    elif tipo == 3:  # maquinaria intermedia
-        horas_uso = np.random.randint(500, 4000, n // tipos)
-        horas_por_dia = np.random.uniform(6, 14, n // tipos)
-        criticidad = np.random.choice([1,2,3], n // tipos)
+    elif tipo == 3:
+        horas_uso = np.random.randint(500, 4000, size)
+        horas_por_dia = np.random.uniform(6, 14, size)
+        criticidad = np.random.choice([1, 2, 3], size)
 
-    elif tipo == 4:  # maquinaria crítica pero poco usada
-        horas_uso = np.random.randint(200, 3000, n // tipos)
-        horas_por_dia = np.random.uniform(3, 8, n // tipos)
-        criticidad = np.random.choice([3], n // tipos)
+    elif tipo == 4:
+        horas_uso = np.random.randint(200, 3000, size)
+        horas_por_dia = np.random.uniform(3, 8, size)
+        criticidad = np.full(size, 3)
 
-    else:  # maquinaria vieja heredada
-        horas_uso = np.random.randint(2000, 7000, n // tipos)
-        horas_por_dia = np.random.uniform(6, 16, n // tipos)
-        criticidad = np.random.choice([2,3], n // tipos)
+    else:  # tipo 5
+        horas_uso = np.random.randint(2000, 7000, size)
+        horas_por_dia = np.random.uniform(6, 16, size)
+        criticidad = np.random.choice([2, 3], size)
 
-    dias_sin_mantenimiento = np.random.randint(0, 365, n // tipos)
-    fallas_previas = np.random.poisson(1.5, n // tipos)
-    antiguedad = np.random.randint(1, 20, n // tipos)
+    # Antigüedad de la máquina (en años)
+    antiguedad = np.random.randint(1, 20, size)
 
-    # Score lógico (más balanceado)
+    # Horas que se espera que trabaje en los próximos 30 días
+    uso_proyectado_30d = horas_por_dia * horizonte_dias
+
+    # --- Historial de fallas: aumenta con el uso y la antigüedad ---
+    lambda_fallas = 0.2 + 0.0004 * horas_uso + 0.1 * (antiguedad / 10)
+    lambda_fallas = np.clip(lambda_fallas, 0.1, 8.0)
+    fallas_previas = np.random.poisson(lambda_fallas)
+
+    # --- Días desde el último mantenimiento: correlacionado con antigüedad y fallas ---
+    dias_sin_mantenimiento_media = 30 + antiguedad * 8 + fallas_previas * 5
+    dias_sin_mantenimiento = np.random.normal(
+        dias_sin_mantenimiento_media, 40
+    )
+    dias_sin_mantenimiento = np.clip(dias_sin_mantenimiento, 0, 365).astype(int)
+
+    # --- Probabilidad de fallo en los próximos 30 días ---
+    base = base_failure_rate[tipo]
+    logit_base = np.log(base / (1 - base))
+
+    # Score logístico: combina factores con ruido
     score = (
-        0.00008 * horas_uso +
-        0.003 * dias_sin_mantenimiento +
-        0.35 * fallas_previas +
-        0.04 * antiguedad +
-        0.04 * horas_por_dia +
-        0.4 * criticidad +
-        np.random.normal(0, 0.5, n // tipos)
+        logit_base
+        + 0.00025 * (horas_uso - 2500)           # mucho uso acumulado → más riesgo
+        + 0.004 * (dias_sin_mantenimiento - 120) # mucho tiempo sin mantenimiento → más riesgo
+        + 0.6 * fallas_previas                   # muchas fallas históricas → más riesgo
+        + 0.08 * (antiguedad - 8)                # máquinas viejas → más riesgo
+        + 0.03 * (uso_proyectado_30d - 300)      # alto uso futuro → más riesgo
+        + 0.5 * (criticidad - 2)                 # más críticas → más riesgo
+        + np.random.normal(0, 0.7, size)         # variabilidad no explicada
     )
 
-    prob = 1 / (1 + np.exp(-score))
+    prob_30d = 1 / (1 + np.exp(-score))
+    fallo_30d = np.random.binomial(1, prob_30d)
 
     df_temp = pd.DataFrame({
         "horas_uso": horas_uso,
@@ -59,24 +92,18 @@ for tipo in range(1, tipos + 1):
         "fallas_previas": fallas_previas,
         "antiguedad": antiguedad,
         "horas_por_dia": horas_por_dia,
+        "uso_proyectado_30d": uso_proyectado_30d,
         "criticidad": criticidad,
         "tipo_maquina": tipo,
-        "prob": prob
+        "fallo_30d": fallo_30d
     })
 
     data_list.append(df_temp)
 
-data = pd.concat(data_list)
+data = pd.concat(data_list, ignore_index=True)
 
-# Ahora forzamos balance 50/50 usando la probabilidad
-data = data.sort_values("prob")
+print("Tasa global de fallo en 30 días:", data["fallo_30d"].mean())
+print("\nTasa de fallo por tipo de máquina:")
+print(data.groupby("tipo_maquina")["fallo_30d"].mean())
 
-mitad = len(data) // 2
-data["fallo"] = 0
-data.iloc[mitad:, data.columns.get_loc("fallo")] = 1
-
-data = data.drop(columns=["prob"])
-
-print("Media de fallo: ", data["fallo"].mean())
-
-data.to_csv("dataset_balanceado.csv", index=False)
+data.to_csv("dataset_mantenimiento_30d.csv", index=False)

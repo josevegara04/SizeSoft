@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { MantenimientoLayoutComponent } from './mantenimiento/mantenimiento-layout';
-import { DashboardComponent } from './mantenimiento/dashboard/dashboard'; 
 import { MaestrosComponent } from './mantenimiento/maestros/maestros';
 import { ActividadesMantenimientoComponent } from './mantenimiento/maestros/actividades-mantenimiento/actividades-mantenimiento';
 import { CausasMantenimientoComponent } from './mantenimiento/maestros/causas-mantenimiento/causas-mantenimiento';
@@ -22,12 +21,6 @@ export const routes: Routes = [
     component: MantenimientoLayoutComponent,
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'maestros/maquinas-equipos-localidades' },
-      {
-        path: 'dashboard',
-        component: DashboardComponent,
-        children: [
-        ],
-      },
       {
         path: 'maestros',
         component: MaestrosComponent,

@@ -1,40 +1,26 @@
 <nav class="navbar">
-  <a class="nav-item disabled" href="#">Dashboard</a>
-  <a class="nav-item disabled" href="#">Administrativo</a>
-  <a class="nav-item disabled" href="#">Contable</a>
-  <a class="nav-item disabled" href="#">POS</a>
-  <a class="nav-item disabled" href="#">Producción</a>
-  <a class="nav-item disabled" href="#">Inventario</a>
-  <a class="nav-item disabled" href="#">Generales</a>
-  <a class="nav-item disabled" href="#">Reportes</a>
+  <a class="nav-item" routerLink="/mantenimiento/dashboard" routerLinkActive="active">Dashboard</a>
 
-  <div class="nav-item dropdown" [class.active]="isMantenimientoActive()">
-    <button type="button" class="nav-item-trigger">Mantenimiento ▾</button>
+  <div class="nav-item dropdown" [class.active]="isMaestrosActive()">
+    <button type="button" class="nav-item-trigger">Maestros ▾</button>
     <div class="dropdown-panel">
-      <button type="button" class="nav-item-trigger" routerLink="/mantenimiento/dashboard">Dashboard</button>
-      <div class="dropdown-item has-submenu">
-        <span>Maestros ▸</span>
-        <div class="submenu-panel">
-          <a class="submenu-item" routerLink="/mantenimiento/maestros/maquinas-equipos-localidades" routerLinkActive="active">Máquinas, equipos y localidades</a>
-          <a class="submenu-item" routerLink="/mantenimiento/maestros/repuestos" routerLinkActive="active">Repuestos</a>
-          <a class="submenu-item" routerLink="/mantenimiento/maestros/causas-mantenimiento" routerLinkActive="active">Causas de Mantenimiento</a>
-          <a class="submenu-item" routerLink="/mantenimiento/maestros/actividades-mantenimiento" routerLinkActive="active">Actividades de Mantenimiento</a>
-          <a class="submenu-item" routerLink="/mantenimiento/maestros/mantenimientos" routerLinkActive="active">Mantenimientos</a>
-          <a class="submenu-item" routerLink="/mantenimiento/maestros/operarios" routerLinkActive="active">Operarios</a>
-          <a class="submenu-item" routerLink="/mantenimiento/maestros/tipos-mantenimiento" routerLinkActive="active">Tipos de Mantenimiento</a>
-        </div>
-      </div>
-      <div class="dropdown-item has-submenu">
-        <span>Transacciones ▸</span>
-        <div class="submenu-panel">
-          <a class="submenu-item" routerLink="/mantenimiento/transacciones/programacion-mantenimientos" routerLinkActive="active">Programación Mantenimientos</a>
-          <a class="submenu-item" routerLink="/mantenimiento/transacciones/ordenes-servicio" routerLinkActive="active">Órdenes de Servicio</a>
-          <a class="submenu-item" routerLink="/mantenimiento/transacciones/mantenimientos" routerLinkActive="active">Mantenimientos</a>
-          <a class="submenu-item" routerLink="/mantenimiento/transacciones/bitacora-planta" routerLinkActive="active">Bitácora de Planta</a>
-        </div>
-      </div>
+      <a class="dropdown-item" routerLink="/mantenimiento/maestros/maquinas-equipos-localidades" routerLinkActive="active">Máquinas, equipos y localidades</a>
+      <a class="dropdown-item" routerLink="/mantenimiento/maestros/repuestos" routerLinkActive="active">Repuestos</a>
+      <a class="dropdown-item" routerLink="/mantenimiento/maestros/causas-mantenimiento" routerLinkActive="active">Causas de Mantenimiento</a>
+      <a class="dropdown-item" routerLink="/mantenimiento/maestros/actividades-mantenimiento" routerLinkActive="active">Actividades de Mantenimiento</a>
+      <a class="dropdown-item" routerLink="/mantenimiento/maestros/mantenimientos" routerLinkActive="active">Mantenimientos</a>
+      <a class="dropdown-item" routerLink="/mantenimiento/maestros/operarios" routerLinkActive="active">Operarios</a>
+      <a class="dropdown-item" routerLink="/mantenimiento/maestros/tipos-mantenimiento" routerLinkActive="active">Tipos de Mantenimiento</a>
     </div>
   </div>
 
-  <a class="nav-item disabled" href="#">Salir</a>
+  <div class="nav-item dropdown" [class.active]="isTransaccionesActive()">
+    <button type="button" class="nav-item-trigger">Transacciones ▾</button>
+    <div class="dropdown-panel">
+      <a class="dropdown-item" routerLink="/mantenimiento/transacciones/programacion-mantenimientos" routerLinkActive="active">Programación Mantenimientos</a>
+      <a class="dropdown-item" routerLink="/mantenimiento/transacciones/ordenes-servicio" routerLinkActive="active">Órdenes de Servicio</a>
+      <a class="dropdown-item" routerLink="/mantenimiento/transacciones/mantenimientos" routerLinkActive="active">Mantenimientos</a>
+      <a class="dropdown-item" routerLink="/mantenimiento/transacciones/bitacora-planta" routerLinkActive="active">Bitácora de Planta</a>
+    </div>
+  </div>
 </nav>

@@ -79,13 +79,15 @@
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 220px;
+  min-width: 280px;
   background: #fff;
   border: 1px solid #d0d0d0;
   border-top: none;
   box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.12);
+  border-radius: 0 0 6px 6px;
   z-index: 100;
   padding: 4px 0;
+  overflow: hidden;
 }
 
 .dropdown:hover .dropdown-panel {

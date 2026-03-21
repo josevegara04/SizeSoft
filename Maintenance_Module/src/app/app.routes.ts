@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MantenimientoLayoutComponent } from './mantenimiento/mantenimiento-layout';
-import { DashboardComponent } from './mantenimiento/dashboard/dashboard'; 
+import { DashboardComponent } from './mantenimiento/dashboard/dashboard';
 import { MaestrosComponent } from './mantenimiento/maestros/maestros';
 import { ActividadesMantenimientoComponent } from './mantenimiento/maestros/actividades-mantenimiento/actividades-mantenimiento';
 import { CausasMantenimientoComponent } from './mantenimiento/maestros/causas-mantenimiento/causas-mantenimiento';
@@ -14,12 +14,16 @@ import { BitacoraPlantaComponent } from './mantenimiento/transacciones/bitacora-
 import { MantenimientosTransComponent } from './mantenimiento/transacciones/mantenimientos-trans/mantenimientos-trans';
 import { OrdenesServicioComponent } from './mantenimiento/transacciones/ordenes-servicio/ordenes-servicio';
 import { ProgramacionMantenimientosComponent } from './mantenimiento/transacciones/programacion-mantenimientos/programacion-mantenimientos';
+import { LoginComponent } from './login/login.component';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'mantenimiento/maestros/maquinas-equipos-localidades' },
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
+  { path: 'login', component: LoginComponent },
   {
     path: 'mantenimiento',
     component: MantenimientoLayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'maestros/maquinas-equipos-localidades' },
       {

@@ -248,7 +248,7 @@ export class LoginComponent implements OnInit {
         if (this.apiService.lboolUserLogged) {
           this.msgSrv.clear();
           //Navegar al módulo por defecto del usuario
-          this.router.navigate([this.lQueryUser[0].menuPath]);
+          this.router.navigate(['/mantenimiento']);
           //Verificar la versión de la aplicación
           this.apiService.Query = '';
           this.apiService.clsQuery = [];

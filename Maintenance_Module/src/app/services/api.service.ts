@@ -137,7 +137,7 @@ export class ApiService {
 
   constructor(private http: HttpClient, private msgSrv: MessagService, private modalService: NgbModal) {
     this.VersApli = '1.4.12';
-    var lstrAmbiente = 'Desarrollo';
+    var lstrAmbiente = 'Pruebas';
     //var lstrAmbiente = 'Pruebas';
     //var lstrAmbiente = 'Producción';
     if (lstrAmbiente == 'Desarrollo' || lstrAmbiente == 'Pruebas') {

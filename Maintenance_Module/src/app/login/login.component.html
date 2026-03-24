@@ -1,0 +1,82 @@
+<div class="detalle">
+  <div class="cont100">
+    <div class="headerl">
+      <div class="buttons">
+        <img src="./assets/icons/LogoCia.png" alt="SizeSoft SAS">
+      </div>
+    </div>
+    <div class="headerc">
+      <h2>  &nbsp;&nbsp; </h2>
+      <h1>{{title}}</h1>
+      <h2>  &nbsp;&nbsp; </h2>
+    </div>
+    <div class="headerr">
+
+    </div>
+  </div>
+  <div class="cont100" >
+    <div class="cont33"></div>
+    <div class="cont33">
+      <div class="cont100">
+        <div class="cont40">
+            <label>Compañía:</label>
+        </div>
+        <div class="cont60">
+          <input [(ngModel)]="apiService.clsUser.CodiComp" maxlength="4" placeholder="Compañía"/>
+        </div>
+      </div>
+      <div class="cont100">
+        <div class="cont40">
+          <label>Usuario:</label>
+        </div>
+        <div class="cont60">
+          <input [(ngModel)]="apiService.clsUser.Id" maxlength="50" placeholder="Usuario"/>
+        </div>
+      </div>
+      <div class="cont100">
+        <div class="cont40">
+          <label>Clave:</label>
+        </div>
+        <div class="cont60">
+          <input type="password" [(ngModel)]="apiService.clsUser.PassUsua" maxlength="20" placeholder="Clave" (keyup.enter)="LogIn()"/>
+        </div>
+      </div>
+      <div class="cont100" *ngIf="this.lnumSessActi > 0">
+        <div class="cont40">
+          <label>Código:</label>
+        </div>
+        <div class="cont60">
+          <input type="text" [(ngModel)]="apiService.clsUser.CodiSegu" maxlength="6" placeholder="Código de seguridad" (keyup.enter)="LogIn()"/>
+        </div>
+      </div>
+    </div>
+    <div class="cont33"></div>
+  </div>
+  <div class="cont100">
+    <div class="cont100">
+      <div class="buttons">
+        <h3>&nbsp;{{lstrMens}}&nbsp;</h3>
+        <h3 *ngIf="this.lnumSessActi > 0">{{ lnumMinu }}:{{ lnumSeco < 10 ? '0' + lnumSeco : lnumSeco }}</h3>
+      </div>
+    </div>
+    <div class="cont100">
+      <div class="buttons">
+        <button class="btn btn-lg btn-outline-primary" style="border: 0.2ch; border-style:solid;" (click)="LogIn()">Ingresar</button>
+      </div>
+    </div>
+    <div class="cont100">
+      &nbsp;
+    </div>
+    <div class="cont100">
+      <div class="buttons">
+        <h3>'Jesús le dijo: Yo soy el camino, y la verdad, y la vida; nadie viene al Padre, sino por mí. ' S.Juan 14:6</h3>
+      </div>
+    </div>
+    <div class="cont100">
+      <div class="buttons">
+        <h3><a href=mailto:contactenos@sizesoft.com.co>Contáctenos</a></h3>
+        <h3>SizeSoft ERP. Versión {{apiService.VersApli}}</h3>
+      </div>
+    </div>
+  </div>
+</div>

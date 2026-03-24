@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,6 +11,7 @@ import { filter } from 'rxjs/operators';
 })
 export class Navbar implements OnInit {
   private readonly router = inject(Router);
+  private readonly apiService = inject(ApiService);
   protected readonly isMaestrosActive = signal(false);
   protected readonly isTransaccionesActive = signal(false);
 
@@ -23,5 +25,10 @@ export class Navbar implements OnInit {
   private updateActiveStates(): void {
     this.isMaestrosActive.set(this.router.url.startsWith('/mantenimiento/maestros'));
     this.isTransaccionesActive.set(this.router.url.startsWith('/mantenimiento/transacciones'));
+  }
+  
+  logout(): void {
+    this.apiService.fnClose();
+    this.router.navigate(['/login']);
   }
 }

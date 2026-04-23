@@ -1,10 +1,19 @@
 <nav class="navbar">
-  <a class="nav-item" routerLink="/mantenimiento/dashboard" routerLinkActive="active">Dashboard</a>
-
   <div class="nav-item dropdown" [class.active]="isMaestrosActive()">
     <button type="button" class="nav-item-trigger">Maestros ▾</button>
     <div class="dropdown-panel">
-      <a class="dropdown-item" routerLink="/mantenimiento/maestros/maquinas-equipos-localidades" routerLinkActive="active">Máquinas, equipos y localidades</a>
+      <button type="button" class="nav-item-trigger" (click)="toggleMaquinas()">
+        Máquinas, Equipos y Localidades ▾
+      </button>
+      @if (isMaquinasActive()) {
+        <div class="dropdown-panel">
+          <a class="dropdown-item"
+             routerLink="/mantenimiento/maestros/maquinas-equipos-localidades"
+             routerLinkActive="active">
+            Listado de partes
+          </a>
+        </div>
+      }
       <a class="dropdown-item" routerLink="/mantenimiento/maestros/repuestos" routerLinkActive="active">Repuestos</a>
       <a class="dropdown-item" routerLink="/mantenimiento/maestros/causas-mantenimiento" routerLinkActive="active">Causas de Mantenimiento</a>
       <a class="dropdown-item" routerLink="/mantenimiento/maestros/actividades-mantenimiento" routerLinkActive="active">Actividades de Mantenimiento</a>

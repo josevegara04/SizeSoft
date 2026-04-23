@@ -1,12 +1,5 @@
 # Desarrollo: volúmenes montados para que los cambios en código se reflejen sin reconstruir
 services:
-  ml_service:
-    build: ./ml_service
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./ml_service:/app
-
   frontend:
     build: ./Maintenance_Module
     ports:
@@ -14,7 +7,5 @@ services:
     volumes:
       - ./Maintenance_Module:/app
       - /app/node_modules
-    depends_on:
-      - ml_service
     environment:
       - CHOKIDAR_USEPOLLING=true

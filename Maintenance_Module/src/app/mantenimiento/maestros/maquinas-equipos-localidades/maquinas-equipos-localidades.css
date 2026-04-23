@@ -22,6 +22,7 @@
    SHARED CARD STYLES
    ============================================= */
 
+
 .selector-card,
 .form-card,
 .sheet-card {
@@ -31,6 +32,31 @@
   margin-bottom: 16px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Visually integrate selector-card with form-card */
+.selector-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  overflow: visible;
+  position: relative;
+  z-index: 20;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.form-card,
+.sheet-card {
+  position: relative;
+  z-index: 1;
+}
+
+.form-card {
+  border-radius: 0 0 8px 8px;
+  margin-top: -1px; /* visually connects with selector */
+  position: relative;
+  z-index: 1;
 }
 
 .selector-header,
@@ -44,11 +70,12 @@
 }
 
 .selector-header {
-  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  background: linear-gradient(135deg, #f1f8e9, #dcedc8);
 }
-
+z
 .form-header {
   background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  margin-top: 0;
 }
 
 .sheet-header {
@@ -139,7 +166,7 @@
   border-radius: 0 0 6px 6px;
   max-height: 220px;
   overflow-y: auto;
-  z-index: 50;
+  z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 

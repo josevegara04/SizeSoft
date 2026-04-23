@@ -6,8 +6,14 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MsgboxComponent } from '../msgbox/msgbox.component';
 import { MessagService } from './messag.service';
 
-const httpOptions = { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) };
-//'Access-Control-Allow-Origin': '*'}) };
+function getHttpOptions(token: string) {
+  return {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    })
+  };
+}
 
 @Injectable({
   providedIn: 'root'
@@ -186,10 +192,7 @@ export class ApiService {
     });
   }
   getQuery(): Observable<any> {
-    /*if (!this.lboolUserLogged){
-      catchError(this.handleError<any>('getQuery'))
-    }else{*/
-    return this.http.post<any>(this.apiUrl, this.clsQuery, httpOptions).pipe(
+    return this.http.post<any>(this.apiUrl, this.clsQuery, getHttpOptions(this.lstrToken)).pipe(
       tap((queryRes: any) => {
         if (!this.lboolCerrSesi) {
           var lRow = queryRes[0];
@@ -217,7 +220,6 @@ export class ApiService {
       }),
       catchError(this.handleError<any>('getQuery'))
     );
-    //}
   }
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
@@ -234,14 +236,14 @@ export class ApiService {
   //Función para la autenticación del usuario
   AuthUser(): Observable<any> {
     this.clsUser.menuApp = 'ERP';
-    return this.http.post<any>(this.apiUrlLI, this.clsUser, httpOptions).pipe(
+    return this.http.post<any>(this.apiUrlLI, this.clsUser, getHttpOptions('')).pipe(
       //tap((userRes: any) => console.log('Consulta ejecutada')),
       catchError(this.handleError<any>('AuthUser'))
     );
   }
   //Función para invocar el SP guardar
   SaveEntity(pvEntity: any[]): Observable<any> {
-    return this.http.post<any>(this.apiUrlSave, pvEntity, httpOptions).pipe(
+    return this.http.post<any>(this.apiUrlSave, pvEntity, getHttpOptions(this.lstrToken)).pipe(
       tap((saveRes: any) => {
         {
           var lRow = saveRes[0];

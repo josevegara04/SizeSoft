@@ -2,18 +2,22 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
+import { CommonModule } from "@angular/common"
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive],
+  standalone: true,
+  imports: [RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
 export class Navbar implements OnInit {
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
+
   protected readonly isMaestrosActive = signal(false);
   protected readonly isTransaccionesActive = signal(false);
+  protected readonly isMaquinasActive = signal(false); // ← replaces isSubmenuOpen
 
   ngOnInit(): void {
     this.updateActiveStates();
@@ -23,12 +27,18 @@ export class Navbar implements OnInit {
   }
 
   private updateActiveStates(): void {
-    this.isMaestrosActive.set(this.router.url.startsWith('/mantenimiento/maestros'));
-    this.isTransaccionesActive.set(this.router.url.startsWith('/mantenimiento/transacciones'));
+    const url = this.router.url;
+    this.isMaestrosActive.set(url.startsWith('/mantenimiento/maestros'));
+    this.isTransaccionesActive.set(url.startsWith('/mantenimiento/transacciones'));
   }
-  
+
   logout(): void {
     this.apiService.fnClose();
     this.router.navigate(['/login']);
+  }
+
+  toggleMaquinas(): void {
+    console.log("actriva");
+    this.isMaquinasActive.set(!this.isMaquinasActive());
   }
 }

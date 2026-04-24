@@ -20,6 +20,7 @@ export class Navbar implements OnInit {
   protected readonly isMaquinasActive = signal(false); // ← replaces isSubmenuOpen
 
   ngOnInit(): void {
+    this.apiService.fnBuscLogo();
     this.updateActiveStates();
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))

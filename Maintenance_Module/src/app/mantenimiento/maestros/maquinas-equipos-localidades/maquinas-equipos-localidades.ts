@@ -39,14 +39,15 @@ export class MaquinasEquiposLocalidadesComponent {
     if (!token) {
       token = this.apiService.lstrToken;
     }
+    console.log(token);
 
     const body = {
-      NumeroParte: Number(this.codigoParte),
+      CodiPart: this.codigoParte,
       NombreParte: this.nombreParte,
       idTipoParte: 2, // TODO: hacerlo dinámico luego
       CodiMaqu: this.codigoMaquina,
 
-      CodiComp: 'PMC1',
+      CodiComp: this.apiService.clsUser.CodiComp,
       Entidad: 300,
       Token: token,
       Accion: 1
@@ -54,7 +55,7 @@ export class MaquinasEquiposLocalidadesComponent {
 
     this.partesService.savePart(body).subscribe({
       next: (res: any) => {
-        console.log('Respuesta backend:', res);
+        console.log('Respuesta backend:', res[0].Messag);
 
         const message = res?.[0]?.Messag || 'Operación realizada';
         const msg = message.toLowerCase();

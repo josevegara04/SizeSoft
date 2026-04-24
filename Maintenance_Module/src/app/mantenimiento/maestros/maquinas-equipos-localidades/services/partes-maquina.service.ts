@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface ParteMaquina {
-  NumeroParte: number;
+  CodiPart: string;
   NombreParte: string;
   idTipoParte: number;
   CodiMaqu: string;
@@ -24,10 +24,10 @@ export class PartesMaquinaService {
   }
 
   // 🔹 Eliminar (Accion = 2)
-  deletePart(numeroParte: number, token: string): Observable<any> {
+  deletePart(codiPart: string, token: string): Observable<any> {
     const body = [
       {
-        NumeroParte: numeroParte,
+        CodiPart: codiPart,
         CodiComp: 'PMC1',
         Entidad: 300,
         Token: token,

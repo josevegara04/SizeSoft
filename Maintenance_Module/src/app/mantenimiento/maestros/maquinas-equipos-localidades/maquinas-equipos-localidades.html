@@ -29,9 +29,17 @@
 
     <!-- BOTONES -->
     <div class="form-actions">
+      <button type="button" class="btn-search" (click)="openModal()">
+        🔍
+      </button>
       <button type="button" class="btn-primary" (click)="handlePart(1)">Guardar</button>
       <button type="button" class="btn-danger" (click)="handlePart(2)">Eliminar</button>
     </div>
 
   </div>
 </div>
+
+<app-partes-modal 
+  *ngIf="showModal"
+  (close)="closeModal()">
+</app-partes-modal>

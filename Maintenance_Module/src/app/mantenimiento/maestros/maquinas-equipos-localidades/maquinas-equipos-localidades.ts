@@ -3,11 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { PartesMaquinaService } from './services/partes-maquina.service';
 import { ApiService } from '../../../services/api.service';
 import { SidebarService } from '../../../side-bar/sidebar.service';
+import { PartesModalComponent } from './modal/partes-modal.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-partes-maquina',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, PartesModalComponent, CommonModule],
   templateUrl: './maquinas-equipos-localidades.html',
   styleUrls: ['./maquinas-equipos-localidades.css']
 })
@@ -19,6 +21,16 @@ export class MaquinasEquiposLocalidadesComponent {
     private apiService: ApiService,
     private sidebarService: SidebarService
   ) {}
+
+  showModal: boolean = false;
+
+  openModal() {
+    this.showModal = true;
+  }
+  
+  closeModal() {
+    this.showModal = false;
+  }
 
   // Main variables
   CodiPart: string = '';

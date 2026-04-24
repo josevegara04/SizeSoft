@@ -31,8 +31,8 @@ export class OrdenesServicioComponent {
 
   // create order
   createOrder() {
-    console.log('CLICK FUNCIONA');
 
+    // build body
     const body = [
       {
         CodiOrdMaqu: this.codiOrdMaqu,
@@ -44,27 +44,20 @@ export class OrdenesServicioComponent {
         idRepues: this.idRepuesto,
         cantid: this.cantidad,
   
-        // 🔥 dinámicos desde ApiService
         CodiComp: this.apiService.clsUser.CodiComp,
         Token: this.apiService.lstrToken,
-  
-        // 🔥 fijo (según backend)
+
         Entidad: 303,
         Accion: 1
       }
     ];
-
-    console.log('LOG AGREGADO:', this.sidebarService.logs$);
   
     this.ordenService.saveOrden(body).subscribe({
       next: (res) => {
-        console.log('Respuesta backend:', res);
-
         const message = res[0]?.Messag || 'Operación completada';
         this.sidebarService.addLog(message);
       },
       error: (err) => {
-        console.error('Error:', err);
         this.sidebarService.addLog('Error al crear la orden');
       }
     });

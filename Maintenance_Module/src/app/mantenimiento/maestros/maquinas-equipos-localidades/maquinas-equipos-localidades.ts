@@ -27,11 +27,11 @@ export class MaquinasEquiposLocalidadesComponent {
   nombreParte: string = '';
 
   // Create or update machine part
-  SavePart() {
+  handlePart(action: number) {
 
     // Validation
     if (!this.CodiPart || !this.CodiMaqu || !this.idTipoPart || !this.nombreParte) {
-      console.log('❌ Campos obligatorios faltantes');
+      
       return;
     }
 
@@ -44,9 +44,9 @@ export class MaquinasEquiposLocalidadesComponent {
     
       CodiComp: this.apiService.clsUser.CodiComp,
       Entidad: 300,
-      
+
       Token: this.apiService.lstrToken,
-      Accion: 1
+      Accion: action
     };
 
     this.partesService.savePart(body).subscribe({

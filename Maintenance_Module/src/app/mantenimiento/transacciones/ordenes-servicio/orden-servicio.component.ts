@@ -30,7 +30,7 @@ export class OrdenesServicioComponent {
   cantidad: number | null = null;
 
   // create order
-  createOrder() {
+  handleOrder(action: number) {
 
     // build body
     const body = [
@@ -48,7 +48,7 @@ export class OrdenesServicioComponent {
         Token: this.apiService.lstrToken,
 
         Entidad: 303,
-        Accion: 1
+        Accion: action
       }
     ];
   

@@ -1,31 +1,31 @@
 <div class="submodule">
 
-    <h2>Órdenes de Servicio</h2>
+    <h2>Orden de Mantenimiento</h2>
   
     <div class="form-container">
   
       <!-- Código Orden -->
       <div class="form-group">
         <label>Código Orden</label>
-        <input type="text" placeholder="ORD-001" />
+        <input type="text" [(ngModel)]="codiOrdMaqu" name="codiOrdMaqu" placeholder="ORD-001" />
       </div>
   
       <!-- Código Máquina -->
       <div class="form-group">
         <label>Código Máquina</label>
-        <input type="text" placeholder="M001" />
+        <input type="text" [(ngModel)]="codiMaqu" placeholder="M001" name="codiMaqu"/>
       </div>
   
       <!-- Fecha inicio -->
       <div class="form-group">
         <label>Fecha Inicio</label>
-        <input type="datetime-local" />
+        <input type="datetime-local" [(ngModel)]="fechaInicio" name="fechaInicio"/>
       </div>
   
       <!-- Tipo mantenimiento -->
       <div class="form-group">
         <label>Tipo de Mantenimiento</label>
-        <select>
+        <select [(ngModel)]="tipoMant" name="tipoMant">
           <option value="">Seleccione</option>
           <option>Preventivo</option>
           <option>Correctivo</option>
@@ -36,24 +36,26 @@
       <!-- Mantenimiento -->
       <div class="form-group">
         <label>ID Mantenimiento</label>
-        <input type="number" />
+        <input type="number" [(ngModel)]="idMantenimiento" name="idMantenimiento"/>
       </div>
   
       <!-- Repuesto -->
       <div class="form-group">
         <label>ID Repuesto</label>
-        <input type="number" />
+        <input type="number" [(ngModel)]="idRepuesto" name="idRepuesto"/>
       </div>
   
       <!-- Cantidad -->
       <div class="form-group">
         <label>Cantidad</label>
-        <input type="number" min="1" />
+        <input type="number" min="1" [(ngModel)]="cantidad" name="cantidad"/>
       </div>
   
       <!-- Botón -->
       <div class="form-actions">
-        <button class="btn-primary">Crear Orden</button>
+        <button type="button" class="btn-primary" (click)="createOrder()">
+          Crear Orden
+        </button>
       </div>
   
     </div>

@@ -1,0 +1,48 @@
+<div class="submodule">
+    <h2>Mantenimientos</h2>
+  
+    <!-- FORMULARIO -->
+    <div class="form-container">
+  
+      <div class="form-group">
+        <label>ID mantenimiento</label>
+        <input type="text" placeholder="Ej: MT001" [(ngModel)]="idMantenimiento" name="idMantenimiento"/>
+      </div>
+  
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" placeholder="Ej: Mantenimiento Preventivo" [(ngModel)]="nombre" name="nombre"/>
+      </div>
+  
+      <div class="form-group">
+        <label>Descripción</label>
+        <input type="text" placeholder="Ej: Cambio de piezas periódicas" [(ngModel)]="Descripcion" name="Descripcion"/>
+      </div>
+
+      <div class="form-group">
+        <label>Código Maquina</label>
+        <input type="text" placeholder="Ej: M001" [(ngModel)]="CodiMaqu" name="CodiMaqu"/>
+      </div>
+
+      <div class="form-group">
+        <label>Tiempo</label>
+        <input type="number" [(ngModel)]="tiempoDias" name="tiempoDias"/>
+      </div>
+  
+      <div class="form-group">
+        <label>Tipo Mantenimiento</label>
+        <select [(ngModel)]="TipoMant" name="TipoMant">
+          <option value="">Seleccione</option>
+          <option value="Preventivo">Preventivo</option>
+          <option value="Reactivo">Reactivo</option>
+          <option value="Correctivo">Correctivo</option>
+        </select>
+      </div>
+  
+      <!-- BOTONES -->
+      <div class="form-actions">
+        <button type="button" class="btn-primary" (click)="handleMaintenance(1)">Guardar</button>
+        <button typec="button" class="btn-danger" (click)="handleMaintenance(2)">Eliminar</button>
+      </div>
+    </div>
+  </div>

@@ -11,7 +11,7 @@ import { TiposMantenimientoComponent } from './mantenimiento/maestros/tipos-mant
 import { TransaccionesComponent } from './mantenimiento/transacciones/transacciones';
 import { BitacoraPlantaComponent } from './mantenimiento/transacciones/bitacora-planta/bitacora-planta';
 import { MantenimientosTransComponent } from './mantenimiento/transacciones/mantenimientos-trans/mantenimientos-trans';
-import { OrdenesServicioComponent } from './mantenimiento/transacciones/ordenes-servicio/ordenes-servicio';
+import { OrdenesServicioComponent } from './mantenimiento/transacciones/ordenes-servicio/orden-servicio.component';
 import { ProgramacionMantenimientosComponent } from './mantenimiento/transacciones/programacion-mantenimientos/programacion-mantenimientos';
 import { LoginComponent } from './login/login.component';
 import { authGuard } from './guards/auth.guard';

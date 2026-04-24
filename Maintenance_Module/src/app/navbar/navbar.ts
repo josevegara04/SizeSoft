@@ -13,7 +13,7 @@ import { CommonModule } from "@angular/common"
 })
 export class Navbar implements OnInit {
   private readonly router = inject(Router);
-  private readonly apiService = inject(ApiService);
+  public readonly apiService = inject(ApiService);
 
   protected readonly isMaestrosActive = signal(false);
   protected readonly isTransaccionesActive = signal(false);
@@ -40,5 +40,10 @@ export class Navbar implements OnInit {
   toggleMaquinas(): void {
     console.log("actriva");
     this.isMaquinasActive.set(!this.isMaquinasActive());
+  }
+
+  // Get the username 
+  get userName(): string {
+    return this.apiService.clsUser.NombUsua?.trim() || 'Usuario 1';
   }
 }

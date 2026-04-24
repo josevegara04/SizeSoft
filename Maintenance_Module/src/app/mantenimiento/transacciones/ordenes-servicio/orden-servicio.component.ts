@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { OrdenServicioService } from './orden-servicio.service';
 import { ApiService } from '../../../services/api.service';
+import { SidebarService } from '../../../side-bar/sidebar.service';
 
 @Component({
   selector: 'app-ordenes-servicio',
@@ -15,10 +16,10 @@ export class OrdenesServicioComponent {
   // constructor from orden-servicio.service
   constructor(
     private ordenService: OrdenServicioService,
-    private apiService: ApiService
-  ) {
-    console.log('COMPONENTE CARGADO');
-  }
+    private apiService: ApiService,
+    private sidebarService: SidebarService
+  ) {}
+
   // main variables
   codiOrdMaqu: string = '';
   codiMaqu: string = '';
@@ -52,15 +53,19 @@ export class OrdenesServicioComponent {
         Accion: 1
       }
     ];
-  
-    console.log('Body enviado:', body);
+
+    console.log('LOG AGREGADO:', this.sidebarService.logs$);
   
     this.ordenService.saveOrden(body).subscribe({
       next: (res) => {
         console.log('Respuesta backend:', res);
+
+        const message = res[0]?.Messag || 'Operación completada';
+        this.sidebarService.addLog(message);
       },
       error: (err) => {
         console.error('Error:', err);
+        this.sidebarService.addLog('Error al crear la orden');
       }
     });
   

@@ -1,5 +1,6 @@
 /* HEADER SUPERIOR */
 .header-top {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -9,6 +10,10 @@
 }
 
 .title {
+  position: absolute;
+  font-size: 32px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 32px;
   font-weight: bold;
   color: #2c6b7a;

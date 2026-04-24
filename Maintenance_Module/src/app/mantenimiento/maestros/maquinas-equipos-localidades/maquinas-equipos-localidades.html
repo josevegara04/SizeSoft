@@ -1,55 +1,36 @@
-<!-- =================== HEADER =================== -->
-<div class="page-container">
-  <h1 class="page-title">MÁQUINAS — Partes Vulnerables</h1>
+<div class="submodule">
+  <h2>Partes de Máquina</h2>
 
-  <!-- =================== NOTIFICATION =================== -->
-  @if (notification) {
-  <div class="notification" [class]="'notification ' + notification.type">
-    <span class="notification-icon">{{ notification.type === 'success' ? '✅' : '⚠️' }}</span>
-    <span class="notification-text">{{ notification.message }}</span>
-    <button class="notification-close" (click)="notification = null">✕</button>
-  </div>
-  }
+  <div class="form-container">
 
-  <!-- =================== FORM =================== -->
-  <div class="form-card">
-    <div class="form-header">
-      <span class="form-icon">🧾</span>
-      <h2>Registrar Parte de Máquina</h2>
+    <!-- Código Parte -->
+    <div class="form-group">
+      <label>Código Parte</label>
+      <input type="text" placeholder="Ej: A001" [(ngModel)]="CodiPart" name="codigoParte"/>
     </div>
 
-    <div class="form-body">
-      <div class="form-grid">
-
-        <!-- Nombre de la parte -->
-        <div class="field-group">
-          <label for="nombreParte">Nombre de la parte</label>
-          <input id="nombreParte" type="text" placeholder="Ej: Rodamiento principal"
-            [(ngModel)]="nombreParte" />
-        </div>
-
-        <!-- Código de la parte -->
-        <div class="field-group">
-          <label for="codigoParte">Código de la parte</label>
-          <input id="codigoParte" type="text" placeholder="Ej: ROD-001"
-            [(ngModel)]="codigoParte" />
-        </div>
-
-        <!-- Código de la máquina -->
-        <div class="field-group">
-          <label for="codigoMaquina">Código de la máquina</label>
-          <input id="codigoMaquina" type="text" placeholder="Ej: M001"
-            [(ngModel)]="codigoMaquina" />
-        </div>
-
-      </div>
-
-      <!-- Botón -->
-      <div class="form-actions">
-        <button type="button" class="btn-register" (click)="addPart()">
-          <span>💾</span> Registrar Parte
-        </button>
-      </div>
+    <!-- Código Máquina -->
+    <div class="form-group">
+      <label>Código Máquina</label>
+      <input type="text" placeholder="Ej: M001" [(ngModel)]="CodiMaqu" name="codigoParte"/>
     </div>
+
+    <!-- Tipo Parte -->
+    <div class="form-group">
+      <label>Tipo Parte</label>
+      <input [(ngModel)]="idTipoPart" name="idTipoPart" type="number"/>
+    </div>
+
+    <!-- Nombre Parte -->
+    <div class="form-group">
+      <label>Nombre Parte</label>
+      <input type="text" placeholder="Ej: Filtro de aceite" [(ngModel)]="nombreParte" name="nombreParte"/>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="form-actions">
+      <button type="button" class="btn-primary" (click)="SavePart()">Guardar</button>
+    </div>
+
   </div>
 </div>

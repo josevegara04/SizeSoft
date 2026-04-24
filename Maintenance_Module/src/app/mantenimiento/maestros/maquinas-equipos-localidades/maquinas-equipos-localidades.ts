@@ -44,6 +44,7 @@ export class MaquinasEquiposLocalidadesComponent {
     
       CodiComp: this.apiService.clsUser.CodiComp,
       Entidad: 300,
+      
       Token: this.apiService.lstrToken,
       Accion: 1
     };

@@ -11,5 +11,5 @@ import { CommonModule } from '@angular/common';
 })
 export class App {
   protected readonly title = signal('Maintenance_Module');
-  lboolUserLogged: boolean = false;
+  lboolUserLogged: boolean = true;
 }

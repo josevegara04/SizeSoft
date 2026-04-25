@@ -1,0 +1,26 @@
+.layout-container {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    height: 100%;   /* 🔥 CLAVE */
+    min-height: 0;
+  }
+  
+  /* SIDEBAR */
+  app-sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: #ffffff;
+    border-left: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* MAIN CONTENT */
+  .main-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #f4f6f8;
+    min-height: 0;
+  }

@@ -51,17 +51,17 @@
   
             <!-- FILTROS -->
             <tr class="filters-row">
-              <th><input type="text" [(ngModel)]="filterCodiPart" />/th>
+              <th><input type="text" [(ngModel)]="filterCodiPart" />
               <th><input type="text" [(ngModel)]="filterTipoPart" /></th>
-              <th><input type="text" [(ngModel)]="filterCodiMaqu" />/th>
-              <th><input type="text" placeholder="🔍" /></th>
+              <th><input type="text" [(ngModel)]="filterCodiMaqu" />
+              <th><input type="text" [(ngModel)]="filterNombreParte" /></th>
             </tr>
           </thead>
   
           <tbody>
 
             <!-- DATOS -->
-            <tr *ngFor="let item of results">
+            <tr *ngFor="let item of filteredResults">
               <td>{{ item.CodiPart }}</td>
               <td>{{ item.idTipoParte }}</td>
               <td>{{ item.CodiMaqu }}</td>

@@ -3,12 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { MantenimientosService } from './mantenimientos.service';
 import { ApiService } from '../../../services/api.service';
 import { SidebarService } from '../../../side-bar/sidebar.service';
+import { MantenimientosModalComponent } from './modal/mantenimientos-modal.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-mantenimientos',
   standalone: true,
   templateUrl: "./mantenimientos.html",
-  imports: [FormsModule],
+  imports: [FormsModule, MantenimientosModalComponent, CommonModule],
   styleUrls: ["./mantenimientos.css"],
 })
 export class MantenimientosComponent {
@@ -19,6 +21,16 @@ export class MantenimientosComponent {
     private apiService: ApiService,
     private sidebarService: SidebarService
   ) {}
+
+  showModal: boolean = false;
+
+  openModal() {
+    this.showModal = true;
+  }
+  
+  closeModal() {
+    this.showModal = false;
+  }
 
   // Main variables
   idMantenimiento: number = 0;
@@ -34,7 +46,7 @@ export class MantenimientosComponent {
     // Validation
     if (this.idMantenimiento === null || this.idMantenimiento === undefined || !this.nombre || !this.Descripcion ||!this.CodiMaqu || this.tiempoDias === null || this.tiempoDias === undefined || !this.TipoMant) {
       
-      console.log("error");
+      this.sidebarService.addLog("llena todos los campos");
       return;
     }
 

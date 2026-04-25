@@ -1,0 +1,108 @@
+<!-- MODAL BUSQUEDA -->
+<div class="modal-overlay">
+
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Búsqueda de Mantenimientos</h2>
+        <button type="button" class="btn-danger" (click)="cerrarModal()">Cerrar</button>
+      </div>
+      
+  
+      <!-- FORM FILTROS -->
+      <!-- <form class="modal-form" (ngSubmit)="handleSearch()">
+  
+        <div class="form-group">
+          <label>ID mantenimiento</label>
+          <input type="text" placeholder="Ej: MT001" [(ngModel)]="idMantenimiento" name="idMantenimiento"/>
+        </div>
+  
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" placeholder="Ej: Mantenimiento Preventivo" [(ngModel)]="nombre" name="nombre"/>
+        </div>
+  
+        <div class="form-group">
+          <label>Descripción</label>
+          <input type="text" placeholder="Ej: Cambio de piezas periódicas" [(ngModel)]="Descripcion" name="Descripcion"/>
+        </div>
+  
+        <div class="form-group">
+          <label>Código Maquina</label>
+          <input type="text" placeholder="Ej: M001" [(ngModel)]="CodiMaqu" name="CodiMaqu"/>
+        </div>
+
+        <div class="form-group">
+          <label>Tiempo</label>
+          <input type="number" [(ngModel)]="tiempoDias" name="tiempoDias"/>
+        </div>
+  
+        <div class="form-group">
+          <label>Tipo Mantenimiento</label>
+          <select [(ngModel)]="TipoMant" name="TipoMant">
+            <option value="">Seleccione</option>
+            <option value="Preventivo">Preventivo</option>
+            <option value="Reactivo">Reactivo</option>
+            <option value="Correctivo">Correctivo</option>
+          </select>
+        </div>
+
+       
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">Buscar</button>
+        </div>
+      </form> -->
+  
+      <!-- TABLA -->
+      <div class="modal-table">
+  
+        <table>
+  
+          <thead>
+            <tr>
+              <th>ID Mantenimiento</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Código Máquina</th>
+              <th>Tiempo</th>
+              <th>Tipo Mantenimiento</th>
+            </tr>
+  
+            <!-- FILTROS -->
+            <tr class="filters-row">
+              <th><input type="text" [(ngModel)]="filterIdMantenimiento" />
+              <th><input type="text" [(ngModel)]="filterNombre" /></th>
+              <th><input type="text" [(ngModel)]="filterDescripcion"/>
+              <th><input type="text" [(ngModel)]="filterCodiMaqu" /></th>
+              <th><input type="text" [(ngModel)]="filterTiempoDias"/>
+              <th><input type="text" [(ngModel)]="filterTipoMant"/>
+            </tr>
+          </thead>
+  
+          <tbody>
+
+            <!-- DATOS -->
+            <tr *ngFor="let item of filteredResults">
+              <td>{{ item.idMantenimiento }}</td>
+              <td>{{ item.nombre }}</td>
+              <td>{{ item.Descripcion }}</td>
+              <td>{{ item.CodiMaqu }}</td>
+              <td>{{ item.tiempoDias }}</td>
+              <td>{{ item.TipoMant }}</td>
+            </tr>
+          
+            <!-- SIN DATOS -->
+            <tr *ngIf="results.length === 0">
+              <td colspan="6" class="no-data">
+                No data to display.
+              </td>
+            </tr>
+          
+          </tbody>
+  
+        </table>
+  
+      </div>
+  
+    </div>
+  
+  </div>

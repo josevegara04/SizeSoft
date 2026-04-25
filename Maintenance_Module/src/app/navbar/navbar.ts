@@ -18,6 +18,8 @@ export class Navbar implements OnInit {
   protected readonly isMaestrosActive = signal(false);
   protected readonly isTransaccionesActive = signal(false);
   protected readonly isMaquinasActive = signal(false); // ← replaces isSubmenuOpen
+  protected readonly isMaestrosOpen = signal(false);
+  protected readonly isTransaccionesOpen = signal(false);
 
   ngOnInit(): void {
     this.apiService.fnBuscLogo();
@@ -46,5 +48,15 @@ export class Navbar implements OnInit {
   // Get the username 
   get userName(): string {
     return this.apiService.clsUser.NombUsua?.trim() || 'Usuario 1';
+  }
+
+  toggleMaestros(): void {
+    this.isMaestrosOpen.set(!this.isMaestrosOpen());
+    this.isTransaccionesOpen.set(false);
+  }
+  
+  toggleTransacciones(): void {
+    this.isTransaccionesOpen.set(!this.isTransaccionesOpen());
+    this.isMaestrosOpen.set(false);
   }
 }

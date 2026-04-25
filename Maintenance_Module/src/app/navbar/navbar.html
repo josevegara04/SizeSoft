@@ -15,20 +15,24 @@
 <nav class="navbar">
   <div class="nav-left">
     <div class="nav-item dropdown" [class.active]="isMaestrosActive()">
-      <button type="button" class="nav-item-trigger">Maestros ▾</button>
-      <div class="dropdown-panel">
-        <button type="button" class="nav-item-trigger" (click)="toggleMaquinas()">
-          Máquinas, Equipos y Localidades ▾
-        </button>
-        @if (isMaquinasActive()) {
-          <div class="dropdown-panel">
-            <a class="dropdown-item"
-              routerLink="/mantenimiento/maestros/maquinas-equipos-localidades"
-              routerLinkActive="active">
-              Listado de partes
-            </a>
-          </div>
-        }
+      <button type="button" class="nav-item-trigger" (click)="toggleMaestros()">
+        Maestros ▾
+      </button>
+      <div class="dropdown-panel" *ngIf="isMaestrosOpen()">
+        <div class="dropdown-item has-submenu" (click)="toggleMaquinas()">
+          Máquinas, Equipos y Localidades ▶
+
+          @if (isMaquinasActive()) {
+            <div class="submenu-panel">
+              <a class="submenu-item"
+                routerLink="/mantenimiento/maestros/maquinas-equipos-localidades"
+                routerLinkActive="active">
+                Listado de partes
+              </a>
+            </div>
+          }
+        </div>
+        
         <a class="dropdown-item" routerLink="/mantenimiento/maestros/repuestos" routerLinkActive="active">Repuestos</a>
         <a class="dropdown-item" routerLink="/mantenimiento/maestros/causas-mantenimiento" routerLinkActive="active">Causas de Mantenimiento</a>
         <a class="dropdown-item" routerLink="/mantenimiento/maestros/actividades-mantenimiento" routerLinkActive="active">Actividades de Mantenimiento</a>
@@ -39,8 +43,10 @@
     </div>
 
     <div class="nav-item dropdown" [class.active]="isTransaccionesActive()">
-      <button type="button" class="nav-item-trigger">Transacciones ▾</button>
-      <div class="dropdown-panel">
+      <button type="button" class="nav-item-trigger" (click)="toggleTransacciones()">
+        Transacciones ▾
+      </button>
+      <div class="dropdown-panel" *ngIf="isTransaccionesOpen()">
         <a class="dropdown-item" routerLink="/mantenimiento/transacciones/programacion-mantenimientos" routerLinkActive="active">Programación Mantenimientos</a>
         <a class="dropdown-item" routerLink="/mantenimiento/transacciones/ordenes-servicio" routerLinkActive="active">Órdenes de Servicio</a>
         <a class="dropdown-item" routerLink="/mantenimiento/transacciones/mantenimientos" routerLinkActive="active">Mantenimientos</a>

@@ -38,6 +38,7 @@ export class Navbar implements OnInit {
   logout(): void {
     this.apiService.fnClose();
     this.router.navigate(['/login']);
+    this.apiService.lboolUserLogged = false;
   }
 
   toggleMaquinas(): void {

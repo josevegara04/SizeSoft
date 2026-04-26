@@ -41,10 +41,20 @@ export class MaquinasEquiposLocalidadesComponent {
   // Create or update machine part
   handlePart(action: number) {
 
-    // Validation
-    if (!this.CodiPart || !this.CodiMaqu || !this.idTipoPart || !this.nombreParte) {
-      
-      return;
+    // validation when saving / updating
+    if (action === 1) {
+      if (!this.CodiPart || !this.CodiMaqu || !this.idTipoPart || !this.nombreParte) {
+        this.sidebarService.addLog('Faltan campos para guardar');
+        return;
+      }
+    }
+
+    // Validation when deleting
+    if (action === 2) {
+      if (!this.CodiPart || !this.CodiMaqu) {
+        this.sidebarService.addLog('Debes ingresar el código de la parte para eliminar');
+        return;
+      }
     }
 
     // Body for request
@@ -70,7 +80,6 @@ export class MaquinasEquiposLocalidadesComponent {
       error: (err) => {
         this.sidebarService.addLog('Error al guardar la parte');
       }
-  
     });
   }
 }

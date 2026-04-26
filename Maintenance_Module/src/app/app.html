@@ -1,5 +1,5 @@
 <div class="app-container">
-  <app-navbar *ngIf="lboolUserLogged"></app-navbar>
+  <app-navbar *ngIf="apiService.lboolUserLogged"></app-navbar>
   <main class="app-main">
     <router-outlet></router-outlet>
   </main>

@@ -1,179 +1,85 @@
-import { Component, inject, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MaquinasService, Maquina } from './services/maquinas.service';
-import { PartesMaquinaService, ParteMaquina } from './services/partes-maquina.service';
+import { PartesMaquinaService } from './services/partes-maquina.service';
+import { ApiService } from '../../../services/api.service';
+import { SidebarService } from '../../../side-bar/sidebar.service';
+import { PartesModalComponent } from './modal/partes-modal.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-maquinas-equipos-localidades',
+  selector: 'app-partes-maquina',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, PartesModalComponent, CommonModule],
   templateUrl: './maquinas-equipos-localidades.html',
-  styleUrl: './maquinas-equipos-localidades.css',
+  styleUrls: ['./maquinas-equipos-localidades.css']
 })
 export class MaquinasEquiposLocalidadesComponent {
-  private readonly maquinasService = inject(MaquinasService);
-  private readonly partesService = inject(PartesMaquinaService);
 
-  // Machine selector
-  searchTerm = '';
-  showDropdown = false;
-  filteredMaquinas: Maquina[] = [];
-  selectedMaquina: Maquina | null = null;
+  // Construcutor
+  constructor(
+    private partesService: PartesMaquinaService,
+    private apiService: ApiService,
+    private sidebarService: SidebarService
+  ) {}
 
-  // Part form
-  newPart = { nombreParte: '', codigoParte: '' };
+  showModal: boolean = false;
 
-  // Inline edit
-  editingPartId: string | null = null;
-  editForm = { nombreParte: '', codigoParte: '' };
-
-  // Delete confirmation
-  deleteConfirm: ParteMaquina | null = null;
-
-  // Parts list
-  partes: ParteMaquina[] = [];
-
-  // Notification
-  notification: { type: 'success' | 'error'; message: string } | null = null;
-
-  // ─── Machine Search ──────────────────────────────
-
-  onSearch(): void {
-    this.showDropdown = true;
-    if (!this.searchTerm.trim()) {
-      this.filteredMaquinas = this.maquinasService.getAll();
-    } else {
-      this.filteredMaquinas = this.maquinasService.searchByNombre(this.searchTerm);
-    }
+  openModal() {
+    this.showModal = true;
+  }
+  
+  closeModal() {
+    this.showModal = false;
   }
 
-  selectMaquina(maq: Maquina): void {
-    this.selectedMaquina = maq;
-    this.searchTerm = '';
-    this.showDropdown = false;
-    this.filteredMaquinas = [];
-    this.notification = null;
-    this.editingPartId = null;
-    this.loadPartes();
-  }
+  // Main variables
+  CodiPart: string = '';
+  CodiMaqu: string = '';
+  idTipoPart: string = '';
+  nombreParte: string = '';
 
-  clearSelection(): void {
-    this.selectedMaquina = null;
-    this.partes = [];
-    this.newPart = { nombreParte: '', codigoParte: '' };
-    this.editingPartId = null;
-    this.deleteConfirm = null;
-    this.notification = null;
-  }
+  // Create or update machine part
+  handlePart(action: number) {
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.search-box')) {
-      this.showDropdown = false;
-    }
-  }
-
-  // ─── Parts CRUD ──────────────────────────────────
-
-  loadPartes(): void {
-    if (this.selectedMaquina) {
-      this.partes = this.partesService.getByMaquinaId(this.selectedMaquina.id);
-    }
-  }
-
-  addPart(): void {
-    if (!this.selectedMaquina) {
-      this.showNotification('error', 'Debe seleccionar una máquina antes de registrar partes.');
-      return;
+    // validation when saving / updating
+    if (action === 1) {
+      if (!this.CodiPart || !this.CodiMaqu || !this.idTipoPart || !this.nombreParte) {
+        this.sidebarService.addLog('Faltan campos para guardar');
+        return;
+      }
     }
 
-    const result = this.partesService.create(
-      this.selectedMaquina.id,
-      this.newPart.nombreParte,
-      this.newPart.codigoParte
-    );
-
-    if (result.success) {
-      this.newPart = { nombreParte: '', codigoParte: '' };
-      this.loadPartes();
-      this.showNotification('success', `Parte "${result.part!.nombreParte}" registrada exitosamente en la ficha técnica.`);
-    } else {
-      this.showNotification('error', result.error!);
+    // Validation when deleting
+    if (action === 2) {
+      if (!this.CodiPart || !this.CodiMaqu) {
+        this.sidebarService.addLog('Debes ingresar el código de la parte para eliminar');
+        return;
+      }
     }
-  }
 
-  // ─── Inline Edit ─────────────────────────────────
+    // Body for request
+    const body = {
+      CodiPart: this.CodiPart,
+      NombreParte: this.nombreParte,
+      idTipoParte: Number(this.idTipoPart),
+      CodiMaqu: this.CodiMaqu,
+    
+      CodiComp: this.apiService.clsUser.CodiComp,
+      Entidad: 300,
 
-  startEdit(parte: ParteMaquina): void {
-    this.editingPartId = parte.id;
-    this.editForm = { nombreParte: parte.nombreParte, codigoParte: parte.codigoParte };
-    this.notification = null;
-  }
+      Token: this.apiService.lstrToken,
+      Accion: action
+    };
 
-  saveEdit(): void {
-    if (!this.editingPartId) return;
+    this.partesService.savePart(body).subscribe({
 
-    const result = this.partesService.update(
-      this.editingPartId,
-      this.editForm.nombreParte,
-      this.editForm.codigoParte
-    );
-
-    if (result.success) {
-      this.editingPartId = null;
-      this.loadPartes();
-      this.showNotification('success', `Parte "${result.part!.nombreParte}" actualizada exitosamente.`);
-    } else {
-      this.showNotification('error', result.error!);
-    }
-  }
-
-  cancelEdit(): void {
-    this.editingPartId = null;
-  }
-
-  // ─── Delete with Confirmation ────────────────────
-
-  confirmDelete(parte: ParteMaquina): void {
-    this.deleteConfirm = parte;
-  }
-
-  executeDelete(): void {
-    if (!this.deleteConfirm) return;
-    const name = this.deleteConfirm.nombreParte;
-    this.partesService.delete(this.deleteConfirm.id);
-    this.deleteConfirm = null;
-    this.loadPartes();
-    this.showNotification('success', `Parte "${name}" eliminada exitosamente.`);
-  }
-
-  cancelDelete(): void {
-    this.deleteConfirm = null;
-  }
-
-  // ─── Helpers ─────────────────────────────────────
-
-  formatDate(isoDate: string): string {
-    try {
-      return new Date(isoDate).toLocaleDateString('es-CO', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
-    } catch {
-      return isoDate;
-    }
-  }
-
-  private showNotification(type: 'success' | 'error', message: string): void {
-    this.notification = { type, message };
-    if (type === 'success') {
-      setTimeout(() => {
-        if (this.notification?.message === message) {
-          this.notification = null;
-        }
-      }, 5000);
-    }
+      next: (res) => {
+        const message = res[0]?.Messag || 'Operación completada';
+        this.sidebarService.addLog(message);
+      },
+      error: (err) => {
+        this.sidebarService.addLog('Error al guardar la parte');
+      }
+    });
   }
 }

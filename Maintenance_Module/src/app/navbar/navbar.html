@@ -1,27 +1,61 @@
+<div class="header-top">
+
+  <!-- Logo izquierdo -->
+  <img src="assets/icons/LogoCia.png" class="logo-left" />
+
+  <!-- Título -->
+  <h1 class="title">SizeSoft ERP</h1>
+
+  <!-- Logo empresa -->
+  <!-- <div class="company">
+    <img src="assets/logo-company.png" class="logo-right" />
+  </div> -->
+</div>
+
 <nav class="navbar">
-  <a class="nav-item" routerLink="/mantenimiento/dashboard" routerLinkActive="active">Dashboard</a>
+  <div class="nav-left">
+    <div class="nav-item dropdown" [class.active]="isMaestrosActive()">
+      <button type="button" class="nav-item-trigger" (click)="toggleMaestros()">
+        Maestros ▾
+      </button>
+      <div class="dropdown-panel" *ngIf="isMaestrosOpen()">
+        <div class="dropdown-item has-submenu" (click)="toggleMaquinas()">
+          Máquinas, Equipos y Localidades ▶
 
-  <div class="nav-item dropdown" [class.active]="isMaestrosActive()">
-    <button type="button" class="nav-item-trigger">Maestros ▾</button>
-    <div class="dropdown-panel">
-      <a class="dropdown-item" routerLink="/mantenimiento/maestros/maquinas-equipos-localidades" routerLinkActive="active">Máquinas, equipos y localidades</a>
-      <a class="dropdown-item" routerLink="/mantenimiento/maestros/repuestos" routerLinkActive="active">Repuestos</a>
-      <a class="dropdown-item" routerLink="/mantenimiento/maestros/causas-mantenimiento" routerLinkActive="active">Causas de Mantenimiento</a>
-      <a class="dropdown-item" routerLink="/mantenimiento/maestros/actividades-mantenimiento" routerLinkActive="active">Actividades de Mantenimiento</a>
-      <a class="dropdown-item" routerLink="/mantenimiento/maestros/mantenimientos" routerLinkActive="active">Mantenimientos</a>
-      <a class="dropdown-item" routerLink="/mantenimiento/maestros/operarios" routerLinkActive="active">Operarios</a>
-      <a class="dropdown-item" routerLink="/mantenimiento/maestros/tipos-mantenimiento" routerLinkActive="active">Tipos de Mantenimiento</a>
+          @if (isMaquinasActive()) {
+            <div class="submenu-panel">
+              <a class="submenu-item"
+                routerLink="/mantenimiento/maestros/maquinas-equipos-localidades"
+                routerLinkActive="active">
+                Listado de partes
+              </a>
+            </div>
+          }
+        </div>
+        
+        <a class="dropdown-item" routerLink="/mantenimiento/maestros/repuestos" routerLinkActive="active">Repuestos</a>
+        <a class="dropdown-item" routerLink="/mantenimiento/maestros/causas-mantenimiento" routerLinkActive="active">Causas de Mantenimiento</a>
+        <a class="dropdown-item" routerLink="/mantenimiento/maestros/actividades-mantenimiento" routerLinkActive="active">Actividades de Mantenimiento</a>
+        <a class="dropdown-item" routerLink="/mantenimiento/maestros/mantenimientos" routerLinkActive="active">Mantenimientos</a>
+        <a class="dropdown-item" routerLink="/mantenimiento/maestros/operarios" routerLinkActive="active">Operarios</a>
+        <a class="dropdown-item" routerLink="/mantenimiento/maestros/tipos-mantenimiento" routerLinkActive="active">Tipos de Mantenimiento</a>
+      </div>
     </div>
-  </div>
 
-  <div class="nav-item dropdown" [class.active]="isTransaccionesActive()">
-    <button type="button" class="nav-item-trigger">Transacciones ▾</button>
-    <div class="dropdown-panel">
-      <a class="dropdown-item" routerLink="/mantenimiento/transacciones/programacion-mantenimientos" routerLinkActive="active">Programación Mantenimientos</a>
-      <a class="dropdown-item" routerLink="/mantenimiento/transacciones/ordenes-servicio" routerLinkActive="active">Órdenes de Servicio</a>
-      <a class="dropdown-item" routerLink="/mantenimiento/transacciones/mantenimientos" routerLinkActive="active">Mantenimientos</a>
-      <a class="dropdown-item" routerLink="/mantenimiento/transacciones/bitacora-planta" routerLinkActive="active">Bitácora de Planta</a>
+    <div class="nav-item dropdown" [class.active]="isTransaccionesActive()">
+      <button type="button" class="nav-item-trigger" (click)="toggleTransacciones()">
+        Transacciones ▾
+      </button>
+      <div class="dropdown-panel" *ngIf="isTransaccionesOpen()">
+        <a class="dropdown-item" routerLink="/mantenimiento/transacciones/programacion-mantenimientos" routerLinkActive="active">Programación Mantenimientos</a>
+        <a class="dropdown-item" routerLink="/mantenimiento/transacciones/ordenes-servicio" routerLinkActive="active">Órdenes de Servicio</a>
+        <a class="dropdown-item" routerLink="/mantenimiento/transacciones/mantenimientos" routerLinkActive="active">Mantenimientos</a>
+        <a class="dropdown-item" routerLink="/mantenimiento/transacciones/bitacora-planta" routerLinkActive="active">Bitácora de Planta</a>
+      </div>
     </div>
+    <button class="nav-item" (click)="logout()">Salir</button>
+    <span class="nav-user">
+      {{ userName }}
+    </span>
   </div>
-  <button class="nav-item logout-btn" (click)="logout()">Cerrar sesión</button>
 </nav>

@@ -1,191 +1,45 @@
-<!-- =================== HEADER =================== -->
-<div class="page-container">
-  <h1 class="page-title">MÁQUINAS — Partes Vulnerables</h1>
+<div class="submodule">
+  <h2>Partes de Máquina</h2>
 
-  <!-- =================== MACHINE SELECTOR =================== -->
-  <div class="selector-card">
-    <div class="selector-header">
-      <h2>Seleccionar Máquina</h2>
+  <div class="form-container">
+
+    <!-- Código Parte -->
+    <div class="form-group">
+      <label>Código Parte</label>
+      <input type="text" placeholder="Ej: A001" [(ngModel)]="CodiPart" name="codigoParte"/>
     </div>
-    <div class="selector-body">
-      <div class="search-box">
-        <label for="machineSearch">Buscar máquina:</label>
-        <div class="search-input-wrapper">
-          <input id="machineSearch" type="text" placeholder="Escriba código o nombre de la máquina..."
-            [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" (focus)="showDropdown = true" autocomplete="off" />
-          <span class="search-icon">🔍</span>
-        </div>
 
-        @if (showDropdown && filteredMaquinas.length > 0) {
-        <div class="dropdown-results">
-          @for (maq of filteredMaquinas; track maq.id) {
-          <button class="dropdown-item" (click)="selectMaquina(maq)">
-            <span class="item-code">{{ maq.codigo }}</span>
-            <span class="item-name">{{ maq.nombre }}</span>
-            <span class="item-planta">{{ maq.planta }}</span>
-          </button>
-          }
-        </div>
-        }
-        @if (showDropdown && filteredMaquinas.length === 0 && searchTerm.length > 0) {
-        <div class="dropdown-results">
-          <p class="no-results">No se encontraron máquinas.</p>
-        </div>
-        }
-      </div>
-
-      @if (selectedMaquina) {
-      <div class="selected-machine">
-        <div class="machine-badge">
-          <span class="badge-label">Máquina seleccionada:</span>
-          <span class="badge-code">{{ selectedMaquina.codigo }}</span>
-          <span class="badge-name">{{ selectedMaquina.nombre }}</span>
-          <span class="badge-planta">{{ selectedMaquina.planta }}</span>
-          <button class="badge-clear" title="Deseleccionar" (click)="clearSelection()">✕</button>
-        </div>
-      </div>
-      }
+    <!-- Código Máquina -->
+    <div class="form-group">
+      <label>Código Máquina</label>
+      <input type="text" placeholder="Ej: M001" [(ngModel)]="CodiMaqu" name="codigoParte"/>
     </div>
+
+    <!-- Tipo Parte -->
+    <div class="form-group">
+      <label>Tipo Parte</label>
+      <input [(ngModel)]="idTipoPart" name="idTipoPart" type="number"/>
+    </div>
+
+    <!-- Nombre Parte -->
+    <div class="form-group">
+      <label>Nombre Parte</label>
+      <input type="text" placeholder="Ej: Filtro de aceite" [(ngModel)]="nombreParte" name="nombreParte"/>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="form-actions">
+      <button type="button" class="btn-search" (click)="openModal()">
+        🔍
+      </button>
+      <button type="button" class="btn-primary" (click)="handlePart(1)">Guardar</button>
+      <button type="button" class="btn-danger" (click)="handlePart(2)">Eliminar</button>
+    </div>
+
   </div>
-
-  <!-- =================== NOTIFICATION =================== -->
-  @if (notification) {
-  <div class="notification" [class]="'notification ' + notification.type">
-    <span class="notification-icon">{{ notification.type === 'success' ? '✅' : '⚠️' }}</span>
-    <span class="notification-text">{{ notification.message }}</span>
-    <button class="notification-close" (click)="notification = null">✕</button>
-  </div>
-  }
-
-  <!-- =================== ADD PART FORM =================== -->
-  <div class="form-card">
-    <div class="form-header">
-      <span class="form-icon">🔧</span>
-      <h2>Registrar Parte Vulnerable</h2>
-    </div>
-    <div class="form-body">
-      <div class="part-inputs">
-        <div class="field-group">
-          <label for="nombreParte">Nombre de la parte: <span class="required">*</span></label>
-          <input id="nombreParte" type="text" placeholder="Ej: Rodamiento principal, Banda transportadora..."
-            [(ngModel)]="newPart.nombreParte" />
-        </div>
-        <div class="field-group">
-          <label for="codigoParte">Código de la parte: <span class="required">*</span></label>
-          <input id="codigoParte" type="text" placeholder="Ej: ROD-001, BND-003..." [(ngModel)]="newPart.codigoParte" />
-        </div>
-        <div class="field-action">
-          <button class="btn-register" (click)="addPart()" [disabled]="!selectedMaquina">
-            <span>💾</span> Registrar Parte
-          </button>
-        </div>
-      </div>
-      @if (!selectedMaquina) {
-      <p class="hint-message">⚠️ Debe seleccionar una máquina antes de registrar partes.</p>
-      }
-    </div>
-  </div>
-
-  <!-- =================== FICHA TÉCNICA — PARTS TABLE =================== -->
-  <div class="sheet-card">
-    <div class="sheet-header">
-      <div class="sheet-title-row">
-        <h2>Ficha Técnica — Partes Vulnerables</h2>
-      </div>
-      @if (selectedMaquina) {
-      <span class="sheet-machine-tag">
-        {{ selectedMaquina.codigo }} — {{ selectedMaquina.nombre }}
-      </span>
-      }
-    </div>
-
-    @if (!selectedMaquina) {
-    <div class="empty-state">
-      <p>Seleccione una máquina para ver su ficha técnica de partes vulnerables.</p>
-    </div>
-    } @else if (partes.length === 0) {
-    <div class="empty-state">
-      <span class="empty-icon">📭</span>
-      <p>No hay partes vulnerables registradas para esta máquina.</p>
-    </div>
-    } @else {
-    <div class="table-container">
-      <table class="parts-table">
-        <thead>
-          <tr>
-            <th class="col-num">#</th>
-            <th>Nombre de la Parte</th>
-            <th>Código</th>
-            <th>Fecha de Registro</th>
-            <th class="col-actions">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (parte of partes; track parte.id; let i = $index) {
-          @if (editingPartId === parte.id) {
-          <!-- INLINE EDIT ROW -->
-          <tr class="editing-row">
-            <td class="col-num">{{ i + 1 }}</td>
-            <td>
-              <input type="text" class="inline-input" [(ngModel)]="editForm.nombreParte"
-                placeholder="Nombre de la parte" />
-            </td>
-            <td>
-              <input type="text" class="inline-input" [(ngModel)]="editForm.codigoParte"
-                placeholder="Código de la parte" />
-            </td>
-            <td>{{ formatDate(parte.creadoEn) }}</td>
-            <td class="col-actions">
-              <div class="action-group">
-                <button class="btn-save-inline" title="Guardar cambios" (click)="saveEdit()">✔️</button>
-                <button class="btn-cancel-inline" title="Cancelar" (click)="cancelEdit()">✖️</button>
-              </div>
-            </td>
-          </tr>
-          } @else {
-          <!-- NORMAL ROW -->
-          <tr>
-            <td class="col-num">{{ i + 1 }}</td>
-            <td>{{ parte.nombreParte }}</td>
-            <td><code>{{ parte.codigoParte }}</code></td>
-            <td>{{ formatDate(parte.creadoEn) }}</td>
-            <td class="col-actions">
-              <div class="action-group">
-                <button class="btn-edit" title="Editar parte" (click)="startEdit(parte)">✏️</button>
-                <button class="btn-delete" title="Eliminar parte" (click)="confirmDelete(parte)">🗑️</button>
-              </div>
-            </td>
-          </tr>
-          }
-          }
-        </tbody>
-      </table>
-    </div>
-    <div class="table-footer">
-      <span>Total de partes: <strong>{{ partes.length }}</strong></span>
-    </div>
-    }
-  </div>
-
-  <!-- =================== CONFIRM DELETE MODAL =================== -->
-  @if (deleteConfirm) {
-  <div class="modal-overlay" (click)="cancelDelete()">
-    <div class="modal-box" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <span class="modal-icon">⚠️</span>
-        <h3>Confirmar Eliminación</h3>
-      </div>
-      <p class="modal-message">
-        ¿Está seguro que desea eliminar la parte
-        <strong>"{{ deleteConfirm.nombreParte }}"</strong>
-        (código: <code>{{ deleteConfirm.codigoParte }}</code>)?
-      </p>
-      <p class="modal-warning">Esta acción no se puede deshacer.</p>
-      <div class="modal-actions">
-        <button class="btn-modal-cancel" (click)="cancelDelete()">Cancelar</button>
-        <button class="btn-modal-confirm" (click)="executeDelete()">Sí, eliminar</button>
-      </div>
-    </div>
-  </div>
-  }
 </div>
+
+<app-partes-modal 
+  *ngIf="showModal"
+  (close)="closeModal()">
+</app-partes-modal>

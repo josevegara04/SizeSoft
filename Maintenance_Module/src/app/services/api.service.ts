@@ -5,9 +5,16 @@ import { catchError, tap, debounceTime, switchMap } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MsgboxComponent } from '../msgbox/msgbox.component';
 import { MessagService } from './messag.service';
+import { CookieService } from 'ngx-cookie-service';
 
-const httpOptions = { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) };
-//'Access-Control-Allow-Origin': '*'}) };
+function getHttpOptions(token: string) {
+  return {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    })
+  };
+}
 
 @Injectable({
   providedIn: 'root'
@@ -135,7 +142,7 @@ export class ApiService {
   btnInve: string = '0';
   btnGene: string = '0';
 
-  constructor(private http: HttpClient, private msgSrv: MessagService, private modalService: NgbModal) {
+  constructor(private http: HttpClient, private msgSrv: MessagService, private modalService: NgbModal, private cookieService: CookieService) {
     this.VersApli = '1.4.12';
     var lstrAmbiente = 'Pruebas';
     //var lstrAmbiente = 'Pruebas';
@@ -184,12 +191,18 @@ export class ApiService {
         this.clsUser.Latitu = data.latitude.toString();
       });
     });
+    // 🔥 Restaurar token desde cookie al iniciar
+    if (this.clsUser.CodiComp && this.clsUser.Id) {
+      const cookieKey = 'ERPCookie' + this.clsUser.CodiComp + this.clsUser.Id.toUpperCase();
+      const token = this.cookieService.get(cookieKey);
+      if (token) {
+        this.lstrToken = token;
+        this.lboolUserLogged = true;
+      }
+    }
   }
   getQuery(): Observable<any> {
-    /*if (!this.lboolUserLogged){
-      catchError(this.handleError<any>('getQuery'))
-    }else{*/
-    return this.http.post<any>(this.apiUrl, this.clsQuery, httpOptions).pipe(
+    return this.http.post<any>(this.apiUrl, this.clsQuery, getHttpOptions(this.lstrToken)).pipe(
       tap((queryRes: any) => {
         if (!this.lboolCerrSesi) {
           var lRow = queryRes[0];
@@ -217,7 +230,6 @@ export class ApiService {
       }),
       catchError(this.handleError<any>('getQuery'))
     );
-    //}
   }
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
@@ -234,14 +246,14 @@ export class ApiService {
   //Función para la autenticación del usuario
   AuthUser(): Observable<any> {
     this.clsUser.menuApp = 'ERP';
-    return this.http.post<any>(this.apiUrlLI, this.clsUser, httpOptions).pipe(
+    return this.http.post<any>(this.apiUrlLI, this.clsUser, getHttpOptions('')).pipe(
       //tap((userRes: any) => console.log('Consulta ejecutada')),
       catchError(this.handleError<any>('AuthUser'))
     );
   }
   //Función para invocar el SP guardar
   SaveEntity(pvEntity: any[]): Observable<any> {
-    return this.http.post<any>(this.apiUrlSave, pvEntity, httpOptions).pipe(
+    return this.http.post<any>(this.apiUrlSave, pvEntity, getHttpOptions(this.lstrToken)).pipe(
       tap((saveRes: any) => {
         {
           var lRow = saveRes[0];
@@ -261,6 +273,9 @@ export class ApiService {
                 this.clsUser.NombUsua = '';
                 this.clsUser.PassUsua = '';
                 this.lstrToken = '';
+                // 🔥 limpiar cookie también
+                const cookieKey = 'ERPCookie' + this.clsUser.CodiComp + this.clsUser.Id.toUpperCase();
+                this.cookieService.delete(cookieKey);
                 return;
               }
           }
@@ -272,17 +287,28 @@ export class ApiService {
   //Función para cerrar las sesiones del usuario en la aplicación
   fnClose() {
     //Cerrar la sesión en la BDD
+    console.log('TOKEN ANTES DE CERRAR:', this.lstrToken);
     this.lboolCerrSesi = true;
     this.Query = '';
     this.clsQuery = [];
     this.clsQuery.push({ CodiCons: 'ClosUser', NombPara: 'Compañía', Valor: this.clsUser.CodiComp, CodiComp: this.clsUser.CodiComp, Token: this.lstrToken, Report: '0' });
     this.clsQuery.push({ CodiCons: 'ClosUser', NombPara: 'Codigo', Valor: this.clsUser.Id, CodiComp: '', Token: '', Report: '0' });
-    this.getQuery().subscribe({
+    this.http.post<any>(this.apiUrl, this.clsQuery, getHttpOptions('')).subscribe({
       next: res => {
+        console.log("Respuesta close: ", res);
+        //delete cookie
+        const allCookies = this.cookieService.getAll();
+        for (const key in allCookies) {
+          if (key.startsWith('ERPCookie')) {
+            this.cookieService.delete(key);
+          }
+        }
+
         this.lboolUserLogged = false;
         this.clsUser.CodiComp = '';
         this.clsUser.Id = '';
         this.clsUser.NombUsua = '';
+        this.lstrToken = '';
         this.msgSrv.clear();
       }, error: err => {
         this.lboolUserLogged = false;
@@ -324,5 +350,3 @@ export class ApiService {
     );
   }
 }
-
-

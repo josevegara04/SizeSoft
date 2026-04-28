@@ -1,0 +1,56 @@
+<div class="modal-overlay">
+  <div class="modal">
+
+    <div class="modal-header">
+      <h2>Búsqueda de Operarios</h2>
+      <button type="button" class="btn-danger" (click)="cerrarModal()">Cerrar</button>
+    </div>
+
+    <div class="modal-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Cédula</th>
+            <th>Cargo</th>
+            <th>Especialidad</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+          </tr>
+          <tr class="filters-row">
+            <th><input type="text" [(ngModel)]="filterNombre"  placeholder="Filtrar..." /></th>
+            <th><input type="text" [(ngModel)]="filterApellid" placeholder="Filtrar..." /></th>
+            <th><input type="text" [(ngModel)]="filterCedula"  placeholder="Filtrar..." /></th>
+            <th><input type="text" [(ngModel)]="filterCargo"   placeholder="Filtrar..." /></th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filteredResults; track item.IdOper) {
+            <tr (click)="selectRow(item)">
+              <td>{{ item.Nombre }}</td>
+              <td>{{ item.Apellid }}</td>
+              <td>{{ item.Cedula }}</td>
+              <td>{{ item.Cargo }}</td>
+              <td>{{ item.Especi || '—' }}</td>
+              <td>{{ item.Telefo || '—' }}</td>
+              <td>
+                <span class="badge" [class.badge-activo]="item.Activo == 1" [class.badge-inactivo]="item.Activo != 1">
+                  {{ item.Activo == 1 ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="no-data">No hay operarios registrados.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

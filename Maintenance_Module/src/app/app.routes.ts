@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { MantenimientoLayoutComponent } from './mantenimiento/mantenimiento-layout';
-import { DashboardComponent } from './mantenimiento/dashboard/dashboard';
 import { MaestrosComponent } from './mantenimiento/maestros/maestros';
 import { ActividadesMantenimientoComponent } from './mantenimiento/maestros/actividades-mantenimiento/actividades-mantenimiento';
 import { CausasMantenimientoComponent } from './mantenimiento/maestros/causas-mantenimiento/causas-mantenimiento';
@@ -12,7 +11,7 @@ import { TiposMantenimientoComponent } from './mantenimiento/maestros/tipos-mant
 import { TransaccionesComponent } from './mantenimiento/transacciones/transacciones';
 import { BitacoraPlantaComponent } from './mantenimiento/transacciones/bitacora-planta/bitacora-planta';
 import { MantenimientosTransComponent } from './mantenimiento/transacciones/mantenimientos-trans/mantenimientos-trans';
-import { OrdenesServicioComponent } from './mantenimiento/transacciones/ordenes-servicio/ordenes-servicio';
+import { OrdenesServicioComponent } from './mantenimiento/transacciones/ordenes-servicio/orden-servicio.component';
 import { ProgramacionMantenimientosComponent } from './mantenimiento/transacciones/programacion-mantenimientos/programacion-mantenimientos';
 import { LoginComponent } from './login/login.component';
 import { authGuard } from './guards/auth.guard';
@@ -20,18 +19,13 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
   { path: 'login', component: LoginComponent },
+  /* { path: '', pathMatch: 'full', redirectTo: 'mantenimiento' }, */
   {
     path: 'mantenimiento',
     component: MantenimientoLayoutComponent,
-    canActivate: [authGuard],
+    //canActivate: [authGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'maestros/maquinas-equipos-localidades' },
-      {
-        path: 'dashboard',
-        component: DashboardComponent,
-        children: [
-        ],
-      },
       {
         path: 'maestros',
         component: MaestrosComponent,

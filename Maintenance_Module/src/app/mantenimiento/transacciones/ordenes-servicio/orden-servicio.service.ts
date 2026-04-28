@@ -7,8 +7,8 @@ import { Observable } from 'rxjs';
 })
 export class OrdenServicioService {
 
-  // Endpoint to query/save
-  private API_URL = 'https://erpapipruebas.azurewebsites.net/api/Query/Save'; 
+  private API_URL = 'https://erpapipruebas.azurewebsites.net/api/Query/Save';
+  private API_URL_QUERY = 'https://erpapipruebas.azurewebsites.net/api/Query';
 
   constructor(private http: HttpClient) {}
 
@@ -16,4 +16,7 @@ export class OrdenServicioService {
     return this.http.post(this.API_URL, body);
   }
 
+  search(body: any): Observable<any> {
+    return this.http.post(this.API_URL_QUERY, body);
+  }
 }

@@ -1,198 +1,119 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { Operario } from './operario.model';
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { OperariosService } from './operarios.service';
+import { ApiService } from '../../../services/api.service';
 import { SidebarService } from '../../../side-bar/sidebar.service';
-import { MessagService } from '../../../services/messag.service';
+import { OperariosModalComponent } from './modal/operarios-modal.component';
 
 @Component({
   selector: 'app-operarios',
   standalone: true,
-  imports: [FormsModule, CommonModule],
   templateUrl: './operarios.html',
   styleUrls: ['./operarios.css'],
+  imports: [FormsModule, OperariosModalComponent],
 })
-export class OperariosComponent implements OnInit {
-
-  // ─── State ───
-  readonly operarios   = signal<Operario[]>([]);
-  readonly searchTerm  = signal('');
-  readonly saving      = signal(false);
-  readonly loading     = signal(false);
-  readonly editingId   = signal<number | null>(null);
-  readonly deletingId  = signal<number | null>(null);
-  readonly showConfirmModal = signal(false);
-
-  formData: {
-    nombre: string; apellid: string; cedula: string;
-    cargo: string; especi: string; telefo: string;
-    email: string; activo: boolean;
-  } = this.emptyForm();
-
-  // ─── Computed ───
-  readonly filteredList = computed(() => {
-    const term = this.searchTerm().toLowerCase().trim();
-    if (!term) return this.operarios();
-    return this.operarios().filter(o =>
-      o.nombre.toLowerCase().includes(term)  ||
-      o.apellid.toLowerCase().includes(term) ||
-      o.cedula.toLowerCase().includes(term)  ||
-      o.cargo.toLowerCase().includes(term)   ||
-      o.especi.toLowerCase().includes(term)
-    );
-  });
-
-  readonly isEditing = computed(() => this.editingId() !== null);
+export class OperariosComponent {
 
   constructor(
-    private service: OperariosService,
-    private sidebarSvc: SidebarService,
-    private messagSvc: MessagService,
+    private operariosService: OperariosService,
+    private apiService: ApiService,
+    private sidebarService: SidebarService,
   ) {}
 
-  ngOnInit(): void {
-    this.loadOperarios();
+  // Campos del formulario
+  nombre:  string = '';
+  apellid: string = '';
+  cedula:  string = '';
+  cargo:   string = '';
+  especi:  string = '';
+  telefo:  string = '';
+  email:   string = '';
+  activo:  number = 1;
+
+  // ID del operario cargado (null = nuevo)
+  idOper: number | null = null;
+
+  // Modal
+  showModal: boolean = false;
+
+  openModal(): void {
+    this.showModal = true;
   }
 
-  loadOperarios(): void {
-    this.loading.set(true);
-    this.service.getAll().subscribe({
-      next: (res) => {
-        if (Array.isArray(res)) {
-          this.operarios.set(res.map((r: any) => ({
-            idOper:  r.IdOper  ?? r.idOper,
-            nombre:  r.Nombre  ?? r.nombre  ?? '',
-            apellid: r.Apellid ?? r.apellid ?? '',
-            cedula:  r.Cedula  ?? r.cedula  ?? '',
-            cargo:   r.Cargo   ?? r.cargo   ?? '',
-            especi:  r.Especi  ?? r.especi  ?? '',
-            telefo:  r.Telefo  ?? r.telefo  ?? '',
-            email:   r.Email   ?? r.email   ?? '',
-            activo:  r.Activo  === 1 || r.activo === true,
-          })));
-        }
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+  closeModal(): void {
+    this.showModal = false;
   }
 
-  // ─── Create / Edit ───
-  requestSave(form: NgForm): void {
-    if (!form.valid) return;
-    this.showConfirmModal.set(true);
+  onSelectOperario(item: any): void {
+    this.idOper   = item.IdOper   ?? null;
+    this.nombre   = item.Nombre   ?? '';
+    this.apellid  = item.Apellid  ?? '';
+    this.cedula   = item.Cedula   ?? '';
+    this.cargo    = item.Cargo    ?? '';
+    this.especi   = item.Especi   ?? '';
+    this.telefo   = item.Telefo   ?? '';
+    this.email    = item.Email    ?? '';
+    this.activo   = item.Activo   ?? 1;
+    this.closeModal();
   }
 
-  confirmSave(): void {
-    this.showConfirmModal.set(false);
-    this.saving.set(true);
-
-    const payload = { ...this.formData, idOper: this.editingId() ?? undefined };
-
-    this.service.save(payload).subscribe({
-      next: (res) => {
-        const raw = res?.[0]?.Messag ?? res?.[0]?.message ?? '';
-        const parsed = this.parseMessag(raw);
-
-        if (!parsed.success) {
-          this.messagSvc.add(parsed.message, 2);
-          this.sidebarSvc.addLog(`Error operario: ${parsed.message}`);
-          this.saving.set(false);
-          return;
-        }
-
-        const action = this.isEditing() ? 'actualizado' : 'creado';
-        this.messagSvc.add(`Operario ${action} correctamente.`, 1);
-        this.sidebarSvc.addLog(`Operario ${this.formData.nombre} ${this.formData.apellid} ${action}`);
-        this.loadOperarios();
-        this.resetForm();
-        this.saving.set(false);
-      },
-      error: () => {
-        this.messagSvc.add('Error al conectar con el servidor.', 2);
-        this.saving.set(false);
-      },
-    });
+  clearForm(): void {
+    this.idOper  = null;
+    this.nombre  = '';
+    this.apellid = '';
+    this.cedula  = '';
+    this.cargo   = '';
+    this.especi  = '';
+    this.telefo  = '';
+    this.email   = '';
+    this.activo  = 1;
   }
 
-  cancelConfirm(): void {
-    this.showConfirmModal.set(false);
-  }
-
-  loadForEdit(o: Operario): void {
-    this.editingId.set(o.idOper);
-    this.formData = {
-      nombre:  o.nombre,
-      apellid: o.apellid,
-      cedula:  o.cedula,
-      cargo:   o.cargo,
-      especi:  o.especi,
-      telefo:  o.telefo,
-      email:   o.email,
-      activo:  o.activo,
-    };
-  }
-
-  // ─── Delete ───
-  requestDelete(id: number): void {
-    this.deletingId.set(id);
-  }
-
-  confirmDelete(): void {
-    const id = this.deletingId();
-    if (id === null) return;
-
-    this.service.delete(id).subscribe({
-      next: (res) => {
-        const raw = res?.[0]?.Messag ?? res?.[0]?.message ?? '';
-        const parsed = this.parseMessag(raw);
-
-        if (!parsed.success) {
-          this.messagSvc.add(parsed.message, 2);
-          this.sidebarSvc.addLog(`Error al eliminar operario: ${parsed.message}`);
-        } else {
-          this.operarios.update(list => list.filter(o => o.idOper !== id));
-          this.messagSvc.add('Operario eliminado correctamente.', 1);
-          this.sidebarSvc.addLog(`Operario ID ${id} eliminado`);
-          if (this.editingId() === id) this.resetForm();
-        }
-        this.deletingId.set(null);
-      },
-      error: () => {
-        this.messagSvc.add('Error al conectar con el servidor.', 2);
-        this.deletingId.set(null);
-      },
-    });
-  }
-
-  cancelDelete(): void {
-    this.deletingId.set(null);
-  }
-
-  getDeletingItem(): Operario | undefined {
-    return this.operarios().find(o => o.idOper === this.deletingId()!);
-  }
-
-  // ─── Helpers ───
-  resetForm(): void {
-    this.formData = this.emptyForm();
-    this.editingId.set(null);
-  }
-
-  private emptyForm() {
-    return {
-      nombre: '', apellid: '', cedula: '',
-      cargo: '', especi: '', telefo: '',
-      email: '', activo: true,
-    };
-  }
-
-  private parseMessag(raw: string): { success: boolean; message: string } {
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return { success: true, message: raw };
+  handleOperario(accion: number): void {
+    if (accion === 1) {
+      if (!this.nombre || !this.apellid || !this.cedula || !this.cargo) {
+        this.sidebarService.addLog('Complete todos los campos obligatorios');
+        return;
+      }
     }
+
+    if (accion === 2 && this.idOper === null) {
+      this.sidebarService.addLog('Seleccione un operario para eliminar');
+      return;
+    }
+
+    const body: any = { Accion: accion };
+
+    if (accion === 1) {
+      body['Nombre']  = this.nombre;
+      body['Apellid'] = this.apellid;
+      body['Cedula']  = this.cedula;
+      body['Cargo']   = this.cargo;
+      body['Especi']  = this.especi;
+      body['Telefo']  = this.telefo;
+      body['Email']   = this.email;
+      body['Activo']  = this.activo;
+      if (this.idOper !== null) body['IdOper'] = this.idOper;
+    }
+
+    if (accion === 2) {
+      body['IdOper'] = this.idOper;
+    }
+
+    this.operariosService.save(body).subscribe({
+      next: (res) => {
+        const raw = res?.[0]?.Messag ?? res?.[0]?.message ?? 'Operación completada';
+        let message = raw;
+        try {
+          const parsed = JSON.parse(raw);
+          message = parsed.message ?? raw;
+        } catch {}
+        this.sidebarService.addLog(message);
+        if (accion === 2) this.clearForm();
+      },
+      error: () => {
+        this.sidebarService.addLog('Error al procesar el operario');
+      },
+    });
   }
 }

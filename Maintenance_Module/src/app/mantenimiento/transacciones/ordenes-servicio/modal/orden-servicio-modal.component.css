@@ -1,0 +1,113 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #ffffff;
+  width: 85%;
+  max-width: 1000px;
+  border-radius: 6px;
+  padding: 20px;
+  border: 1px solid #d0d0d0;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.modal h2 {
+  color: #1a237e;
+  font-weight: bold;
+}
+
+.modal-table {
+  background: white;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.modal-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modal-table th {
+  background: #2c6b7a;
+  color: white;
+  padding: 10px;
+  text-align: left;
+}
+
+.modal-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-table tbody tr:hover {
+  background-color: #e8f4f8;
+  cursor: pointer;
+}
+
+.filters-row th {
+  background: #3d8fa3;
+  padding: 6px;
+}
+
+.filters-row input {
+  width: 90%;
+  padding: 5px;
+  border: 1px solid #b5b5b5;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+  font-style: italic;
+}
+
+.btn-danger {
+  background: #c62828;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background: #8e0000;
+}
+
+/* Estado badges */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.estado-1 { background: #1565c0; }
+.estado-2 { background: #2e7d32; }
+.estado-3 { background: #e65100; }
+.estado-4 { background: #616161; }
+.estado-5 { background: #b71c1c; }

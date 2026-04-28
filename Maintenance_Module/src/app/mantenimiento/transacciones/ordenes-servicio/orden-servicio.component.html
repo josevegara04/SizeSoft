@@ -1,64 +1,144 @@
 <div class="submodule">
 
-    <h2>Orden de Mantenimiento</h2>
-  
-    <div class="form-container">
-  
-      <!-- Código Orden -->
-      <div class="form-group">
-        <label>Código Orden</label>
-        <input type="text" [(ngModel)]="codiOrdMaqu" name="codiOrdMaqu" placeholder="ORD-001" />
-      </div>
-  
-      <!-- Código Máquina -->
-      <div class="form-group">
-        <label>Código Máquina</label>
-        <input type="text" [(ngModel)]="codiMaqu" placeholder="M001" name="codiMaqu"/>
-      </div>
-  
-      <!-- Fecha inicio -->
-      <div class="form-group">
-        <label>Fecha Inicio</label>
-        <input type="datetime-local" [(ngModel)]="fechaInicio" name="fechaInicio"/>
-      </div>
-  
-      <!-- Tipo mantenimiento -->
-      <div class="form-group">
-        <label>Tipo de Mantenimiento</label>
-        <select [(ngModel)]="tipoMant" name="tipoMant">
-          <option value="">Seleccione</option>
-          <option>Preventivo</option>
-          <option>Correctivo</option>
-          <option>Reactivo</option>
-        </select>
-      </div>
-  
-      <!-- Mantenimiento -->
-      <div class="form-group">
-        <label>ID Mantenimiento</label>
-        <input type="number" [(ngModel)]="idMantenimiento" name="idMantenimiento"/>
-      </div>
-  
-      <!-- Repuesto -->
-      <div class="form-group">
-        <label>ID Repuesto</label>
-        <input type="number" [(ngModel)]="idRepuesto" name="idRepuesto"/>
-      </div>
-  
-      <!-- Cantidad -->
-      <div class="form-group">
-        <label>Cantidad</label>
-        <input type="number" min="1" [(ngModel)]="cantidad" name="cantidad"/>
-      </div>
-  
-      <!-- Botón -->
-      <div class="form-actions">
-        <button type="button" class="btn-primary" (click)="handleOrder(1)">
-          Crear Orden
-        </button>
-        <button type="button" class="btn-danger" (click)="handleOrder(2)">Eliminar orden</button>
-      </div>
-  
-    </div>
-  
+  <div class="submodule-header">
+    <h2>Órdenes de Servicio</h2>
+    <button type="button" class="btn-search" (click)="openModal()">🔍 Buscar orden</button>
   </div>
+
+  <!-- Banner de estado (visible cuando hay una orden cargada) -->
+  @if (nombreEstado) {
+    <div class="estado-banner estado-{{ idEsta }}">
+      Estado actual: <strong>{{ nombreEstado }}</strong>
+    </div>
+  }
+
+  <!-- CAMPOS PRINCIPALES -->
+  <div class="form-container">
+
+    <div class="form-group">
+      <label>Código Orden <span class="required">*</span></label>
+      <input type="text" [(ngModel)]="codiOrdMaqu" name="codiOrdMaqu" placeholder="Ej: ORD-001" />
+    </div>
+
+    <div class="form-group">
+      <label>Código Máquina <span class="required">*</span></label>
+      <input type="text" [(ngModel)]="codiMaqu" name="codiMaqu" placeholder="Ej: M001" />
+    </div>
+
+    <div class="form-group">
+      <label>Fecha Inicio <span class="required">*</span></label>
+      <input type="datetime-local" [(ngModel)]="fechaInicio" name="fechaInicio" />
+    </div>
+
+    <div class="form-group">
+      <label>Fecha Fin</label>
+      <input type="datetime-local" [(ngModel)]="fechaFin" name="fechaFin" />
+    </div>
+
+    <div class="form-group">
+      <label>Tipo de Mantenimiento <span class="required">*</span></label>
+      <select [(ngModel)]="tipoMant" name="tipoMant">
+        <option value="">Seleccione</option>
+        <option value="Preventivo">Preventivo</option>
+        <option value="Correctivo">Correctivo</option>
+        <option value="Reactivo">Reactivo</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>ID Mantenimiento <span class="required">*</span></label>
+      <input type="number" [(ngModel)]="idMantenimiento" name="idMantenimiento" placeholder="Ej: 1" min="1" />
+    </div>
+
+  </div>
+
+  <!-- REPUESTOS -->
+  <div class="detail-section">
+    <div class="detail-header">
+      <h3>Repuestos</h3>
+      <button type="button" class="btn-add" (click)="addRepuesto()">+ Agregar repuesto</button>
+    </div>
+    <table class="detail-table">
+      <thead>
+        <tr>
+          <th>ID Repuesto</th>
+          <th>Cantidad</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of repuestos; track $index; let i = $index) {
+          <tr>
+            <td>
+              <input type="number" [(ngModel)]="r.idRepues" [name]="'idRepues_' + i" placeholder="ID" min="1" />
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="r.cantid" [name]="'cantid_' + i" placeholder="Cant." min="1" />
+            </td>
+            <td>
+              <button type="button" class="btn-remove" (click)="removeRepuesto(i)" [disabled]="repuestos.length === 1">✕</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- OPERARIOS -->
+  <div class="detail-section">
+    <div class="detail-header">
+      <h3>Operarios</h3>
+      <button type="button" class="btn-add" (click)="addOperario()">+ Agregar operario</button>
+    </div>
+    <div class="operarios-list">
+      @for (o of operarios; track $index; let i = $index) {
+        <div class="operario-item">
+          <label>Operario {{ i + 1 }}</label>
+          <input type="number" [(ngModel)]="operarios[i]" [name]="'operario_' + i" placeholder="ID Operario" min="1" />
+          <button type="button" class="btn-remove" (click)="removeOperario(i)" [disabled]="operarios.length === 1">✕</button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ACCIONES -->
+  <div class="form-actions">
+
+    <button type="button" class="btn-secondary" (click)="clearForm()">Limpiar</button>
+
+    @if (idEsta === null) {
+      <button type="button" class="btn-primary" (click)="handleOrder(1)">Crear Orden</button>
+    }
+
+    @if (idEsta === 1) {
+      <button type="button" class="btn-primary" (click)="handleOrder(3)">Guardar Cambios</button>
+      <button type="button" class="btn-success" (click)="handleOrder(7)">Activar</button>
+      <button type="button" class="btn-danger" (click)="handleOrder(2)">Eliminar</button>
+    }
+
+    @if (idEsta === 2) {
+      <button type="button" class="btn-warning" (click)="handleOrder(4)">Pausar</button>
+      <button type="button" class="btn-success" (click)="handleOrder(6)">Finalizar</button>
+      <button type="button" class="btn-danger" (click)="handleOrder(5)">Cancelar</button>
+    }
+
+    @if (idEsta === 3) {
+      <button type="button" class="btn-primary" (click)="handleOrder(3)">Guardar Cambios</button>
+      <button type="button" class="btn-success" (click)="handleOrder(7)">Activar</button>
+      <button type="button" class="btn-danger" (click)="handleOrder(5)">Cancelar</button>
+    }
+
+    @if (idEsta === 5) {
+      <button type="button" class="btn-danger" (click)="handleOrder(2)">Eliminar</button>
+    }
+
+  </div>
+
+</div>
+
+@if (showModal) {
+  <app-orden-servicio-modal
+    (close)="closeModal()"
+    (select)="onSelectOrder($event)">
+  </app-orden-servicio-modal>
+}

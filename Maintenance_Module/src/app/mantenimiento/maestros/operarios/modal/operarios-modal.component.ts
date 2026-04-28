@@ -43,16 +43,14 @@ export class OperariosModalComponent implements OnInit {
   }
 
   handleSearch(): void {
-    const body = [{
+    this.operariosService.search([{
       CodiCons: 'Operar',
-      NombPara: 'Codigo Compañia',
+      NombPara: 'Compañía',
       Valor:    this.apiService.clsUser.CodiComp,
       CodiComp: this.apiService.clsUser.CodiComp,
       Token:    this.apiService.lstrToken,
       Report:   '0',
-    }];
-
-    this.operariosService.search(body).subscribe({
+    }]).subscribe({
       next: (res) => {
         this.results = Array.isArray(res) ? [...res] : [];
         this.cdr.detectChanges();

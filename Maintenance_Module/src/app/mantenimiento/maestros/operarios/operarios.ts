@@ -45,15 +45,15 @@ export class OperariosComponent {
   }
 
   onSelectOperario(item: any): void {
-    this.idOper   = item.IdOper   ?? null;
-    this.nombre   = item.Nombre   ?? '';
-    this.apellid  = item.Apellid  ?? '';
-    this.cedula   = item.Cedula   ?? '';
-    this.cargo    = item.Cargo    ?? '';
-    this.especi   = item.Especi   ?? '';
-    this.telefo   = item.Telefo   ?? '';
-    this.email    = item.Email    ?? '';
-    this.activo   = item.Activo   ?? 1;
+    this.idOper  = item.IdOper  ?? null;
+    this.nombre  = item.Nombre  ?? '';
+    this.apellid = item.Apellid ?? '';
+    this.cedula  = item.Cedula  ?? '';
+    this.cargo   = item.Cargo   ?? '';
+    this.especi  = item.Especi  ?? '';
+    this.telefo  = item.Telefo  ?? '';
+    this.email   = item.Email   ?? '';
+    this.activo  = item.Activo  ?? 1;
     this.closeModal();
   }
 
@@ -82,7 +82,12 @@ export class OperariosComponent {
       return;
     }
 
-    const body: any = { Accion: accion };
+    const body: any = {
+      Accion:   accion,
+      CodiComp: this.apiService.clsUser.CodiComp,
+      Token:    this.apiService.lstrToken,
+      Entidad:  304,
+    };
 
     if (accion === 1) {
       body['Nombre']  = this.nombre;
@@ -100,7 +105,7 @@ export class OperariosComponent {
       body['IdOper'] = this.idOper;
     }
 
-    this.operariosService.save(body).subscribe({
+    this.operariosService.save([body]).subscribe({
       next: (res) => {
         const raw = res?.[0]?.Messag ?? res?.[0]?.message ?? 'Operación completada';
         let message = raw;

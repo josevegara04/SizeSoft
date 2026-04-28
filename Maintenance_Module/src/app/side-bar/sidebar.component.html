@@ -1,14 +1,47 @@
 <div class="sidebar">
   <div class="header">
-    <h2>MENSAJES</h2>
-    <p class="verse">
+    <div class="header-title">
+      <h2>MENSAJES</h2>
+      <button class="chat-toggle" (click)="toggleChat()" [title]="chatOpen ? 'Cerrar asistente' : 'Abrir asistente IA'">
+        ?
+      </button>
+    </div>
+    <p class="verse" *ngIf="!chatOpen">
       Si fueres flojo en el día de trabajo, Tu fuerza será reducida. Proverbios 24:10
     </p>
   </div>
 
-  <div class="content">
-    <div class="log" *ngFor="let log of sidebarService.logs$ | async">
-      {{ log }}
+  <ng-container *ngIf="!chatOpen">
+    <div class="content">
+      <div class="log" *ngFor="let log of sidebarService.logs$ | async">
+        {{ log }}
+      </div>
     </div>
-  </div>
+  </ng-container>
+
+  <ng-container *ngIf="chatOpen">
+    <div class="chat-messages" #messagesContainer>
+      <div *ngFor="let msg of messages" [ngClass]="['msg', msg.role]">
+        <markdown *ngIf="msg.role === 'bot'" [data]="msg.content"></markdown>
+    <span *ngIf="msg.role === 'user'">{{ msg.content }}</span>
+</div>
+      <div class="msg bot typing" *ngIf="loading">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <div class="chat-input-row">
+        <input
+          type="text"
+          [(ngModel)]="userInput"
+          (keydown.enter)="sendMessage()"
+          placeholder="Escribe tu pregunta..."
+        />
+        <button class="send-btn" (click)="sendMessage()" [disabled]="loading">
+          &#9658;
+        </button>
+      </div>
+      <p class="chat-hint">Asistente IA · SizeSoft</p>
+    </div>
+  </ng-container>
 </div>

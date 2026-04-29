@@ -30,6 +30,7 @@ def get_chat_response(message: str, session_id: str) -> str:
 Responde ÚNICAMENTE basándote en la siguiente documentación del sistema.
 Si la pregunta no está relacionada con el sistema, indícalo amablemente.
 Responde siempre en español, de forma clara, concisa y corta.
+Si te están haciendo una pregunta, es porque ya el usuario está adentro del ERP con sesión iniciada.
 
 
 DOCUMENTACIÓN DEL SISTEMA:

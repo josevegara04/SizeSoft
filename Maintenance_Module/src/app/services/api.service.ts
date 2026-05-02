@@ -6,6 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MsgboxComponent } from '../msgbox/msgbox.component';
 import { MessagService } from './messag.service';
 import { CookieService } from 'ngx-cookie-service';
+import { environment } from '../../environments/environment';
 
 function getHttpOptions(token: string) {
   return {
@@ -59,7 +60,7 @@ export class ApiService {
   //Arreglo para recibir valores de parametros en el searchcomponent
   lstrValoPara = [{ NombPara: '', ValoPara: '', HabiPara: 0 }];
   //variables para el control del login
-  lboolUserLogged: boolean = false;
+  lboolUserLogged: boolean = environment.skipLogin ? true : false;
   lboolCerrSesi: boolean = false;
   lstrToken: string = '';
   //Arreglo para facturar las remisiones, cotrizaciones y pedidos

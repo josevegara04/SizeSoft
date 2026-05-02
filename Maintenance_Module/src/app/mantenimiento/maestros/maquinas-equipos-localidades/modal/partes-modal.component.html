@@ -21,7 +21,16 @@
 
       <div class="form-group">
         <label>Tipo Parte</label>
-        <input type="number" placeholder="Ej: 1" [(ngModel)]="idTipoPart" name="tipoParte" />
+        <input
+          type="text"
+          list="tiposParteBusqueda"
+          placeholder="Ej: Filtración"
+          [(ngModel)]="tipoParteNombre"
+          name="tipoParte"
+        />
+        <datalist id="tiposParteBusqueda">
+          <option *ngFor="let tipoParte of tiposParte" [value]="tipoParte.nombre"></option>
+        </datalist>
       </div>
 
       <div class="form-group">
@@ -52,14 +61,14 @@
           <thead>
             <tr>
               <th>Código</th>
-              <th>Tipo</th>
+              <th>Nombre Tipo</th>
               <th>Máquina</th>
               <th>Nombre</th>
             </tr>
 
             <tr class="filters-row">
               <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterCodiPart" /></th>
-              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterTipoPart" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterNombreTipoParte" /></th>
               <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterCodiMaqu" /></th>
               <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterNombreParte" /></th>
             </tr>
@@ -68,7 +77,7 @@
           <tbody>
             <tr *ngFor="let item of filteredResults">
               <td><code>{{ item.CodiPart }}</code></td>
-              <td>{{ item.idTipoParte }}</td>
+              <td>{{ item.NombreTipoParte }}</td>
               <td>{{ item.CodiMaqu }}</td>
               <td>{{ item.NombreParte }}</td>
             </tr>
@@ -80,7 +89,7 @@
             </tr>
 
             <tr *ngIf="results.length > 0 && filteredResults.length === 0">
-              <td colspan="4" class="no-data">
+              <td colspan="5" class="no-data">
                 No hay coincidencias con los filtros aplicados.
               </td>
             </tr>

@@ -31,7 +31,16 @@
 
       <div class="form-group">
         <label>Tipo Parte</label>
-        <input [(ngModel)]="idTipoPart" name="idTipoPart" type="number" placeholder="Ej: 1" />
+        <input
+          type="text"
+          list="tiposParte"
+          placeholder="Ej: Filtración"
+          [(ngModel)]="tipoParteNombre"
+          name="tipoParteNombre"
+        />
+        <datalist id="tiposParte">
+          <option *ngFor="let tipoParte of tiposParte" [value]="tipoParte.nombre"></option>
+        </datalist>
       </div>
 
       <div class="form-group">

@@ -35,14 +35,56 @@
   padding: 10px;
 }
 
-.log {
-  background: #d6ddd3;
-  border: 1px solid #b5b5b5;
-  padding: 10px;
-  margin-bottom: 8px;
-  border-radius: 4px;
+.log-card {
+  position: relative;
+  background: #f8fbf7;
+  border: 1px solid #b8c9b4;
+  border-left: 4px solid #2c6b7a;
+  padding: 10px 12px 20px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(44, 107, 122, 0.12);
   font-size: 14px;
-  color: #333;
+  color: #24343a;
+  animation: fadeInLog 0.2s ease-in-out;
+}
+
+.log-card::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: -7px;
+  width: 10px;
+  height: 10px;
+  background: #2c6b7a;
+  border-radius: 50%;
+  border: 2px solid #dfe6dd;
+}
+
+.log-message {
+  line-height: 1.35;
+  word-break: break-word;
+  padding-right: 4px;
+}
+
+.log-time {
+  position: absolute;
+  right: 10px;
+  bottom: 5px;
+  font-size: 10px;
+  color: #6d7f70;
+  letter-spacing: 0.2px;
+}
+
+@keyframes fadeInLog {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header-title {

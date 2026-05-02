@@ -15,9 +15,16 @@ import { OrdenesServicioComponent } from './mantenimiento/transacciones/ordenes-
 import { ProgramacionMantenimientosComponent } from './mantenimiento/transacciones/programacion-mantenimientos/programacion-mantenimientos';
 import { LoginComponent } from './login/login.component';
 import { authGuard } from './guards/auth.guard';
+import { environment } from '../environments/environment';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'login' },
+  { 
+    path: '', 
+    pathMatch: 'full', 
+    redirectTo: environment.skipLogin
+      ? 'mantenimiento'
+      : 'login'
+  },
   { path: 'login', component: LoginComponent },
   /* { path: '', pathMatch: 'full', redirectTo: 'mantenimiento' }, */
   {

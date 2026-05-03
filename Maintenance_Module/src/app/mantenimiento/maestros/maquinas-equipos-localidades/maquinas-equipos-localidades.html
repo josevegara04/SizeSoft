@@ -1,45 +1,73 @@
-<div class="submodule">
-  <h2>Partes de Máquina</h2>
+<div class="parts-page">
+  <section class="page-hero">
+    <div>
+      <h2>Partes de Máquina</h2>
+      <p>Registre, consulte y mantenga actualizadas las partes asociadas a cada máquina.</p>
+    </div>
+    <button type="button" class="btn-search hero-action" (click)="openModal()" title="Buscar partes">
+      <span class="button-icon">🔍</span>
+      Buscar partes
+    </button>
+  </section>
 
-  <div class="form-container">
-
-    <!-- Código Parte -->
-    <div class="form-group">
-      <label>Código Parte</label>
-      <input type="text" placeholder="Ej: A001" [(ngModel)]="CodiPart" name="codigoParte"/>
+  <section class="form-panel">
+    <div class="panel-header">
+      <div>
+        <span class="section-kicker">Ficha de parte</span>
+        <h3>Información general</h3>
+      </div>
     </div>
 
-    <!-- Código Máquina -->
-    <div class="form-group">
-      <label>Código Máquina</label>
-      <input type="text" placeholder="Ej: M001" [(ngModel)]="CodiMaqu" name="codigoParte"/>
-    </div>
+    <div class="form-container">
+      <div class="form-group">
+        <label>Código Parte</label>
+        <input type="text" placeholder="Ej: A001" [(ngModel)]="CodiPart" name="codigoParte" />
+      </div>
 
-    <!-- Tipo Parte -->
-    <div class="form-group">
-      <label>Tipo Parte</label>
-      <input [(ngModel)]="idTipoPart" name="idTipoPart" type="number"/>
-    </div>
+      <div class="form-group">
+        <label>Código Máquina</label>
+        <input type="text" placeholder="Ej: M001" [(ngModel)]="CodiMaqu" name="codigoMaquina" />
+      </div>
 
-    <!-- Nombre Parte -->
-    <div class="form-group">
-      <label>Nombre Parte</label>
-      <input type="text" placeholder="Ej: Filtro de aceite" [(ngModel)]="nombreParte" name="nombreParte"/>
-    </div>
+      <div class="form-group">
+        <label>Tipo Parte</label>
+        <input
+          type="text"
+          list="tiposParte"
+          placeholder="Ej: Filtración"
+          [(ngModel)]="tipoParteNombre"
+          name="tipoParteNombre"
+        />
+        <datalist id="tiposParte">
+          <option *ngFor="let tipoParte of tiposParte" [value]="tipoParte.nombre"></option>
+        </datalist>
+      </div>
 
-    <!-- BOTONES -->
-    <div class="form-actions">
-      <button type="button" class="btn-search" (click)="openModal()">
-        🔍
-      </button>
-      <button type="button" class="btn-primary" (click)="handlePart(1)">Guardar</button>
-      <button type="button" class="btn-danger" (click)="handlePart(2)">Eliminar</button>
-    </div>
+      <div class="form-group">
+        <label>Nombre Parte</label>
+        <input
+          type="text"
+          placeholder="Ej: Filtro de aceite"
+          [(ngModel)]="nombreParte"
+          name="nombreParte"
+        />
+      </div>
 
-  </div>
+      <div class="form-actions">
+        <button type="button" class="btn-primary" (click)="handlePart(1)">
+          <span class="button-icon">💾</span>
+          Guardar
+        </button>
+        <button type="button" class="btn-danger" (click)="handlePart(2)">
+          <span class="button-icon">🗑️</span>
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </section>
 </div>
 
-<app-partes-modal 
+<app-partes-modal
   *ngIf="showModal"
   (close)="closeModal()">
 </app-partes-modal>

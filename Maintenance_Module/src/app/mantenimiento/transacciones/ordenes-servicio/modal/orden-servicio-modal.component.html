@@ -1,48 +1,59 @@
 <div class="modal-overlay">
   <div class="modal">
-
     <div class="modal-header">
-      <h2>Búsqueda de Órdenes de Servicio</h2>
-      <button type="button" class="btn-danger" (click)="cerrarModal()">Cerrar</button>
+      <div>
+        <span class="modal-kicker">Consulta de transacciones</span>
+        <h2>Búsqueda de Órdenes de Servicio</h2>
+      </div>
+      <button type="button" class="icon-close" (click)="cerrarModal()" title="Cerrar">✕</button>
     </div>
 
-    <div class="modal-table">
-      <table>
-        <thead>
-          <tr>
-            <th>Código Orden</th>
-            <th>Código Máquina</th>
-            <th>Fecha Inicio</th>
-            <th>Tipo Mantenimiento</th>
-            <th>Estado</th>
-          </tr>
-          <tr class="filters-row">
-            <th><input type="text" [(ngModel)]="filterCodiOrd" placeholder="Filtrar..." /></th>
-            <th><input type="text" [(ngModel)]="filterCodiMaqu" placeholder="Filtrar..." /></th>
-            <th></th>
-            <th><input type="text" [(ngModel)]="filterTipoMant" placeholder="Filtrar..." /></th>
-            <th><input type="text" [(ngModel)]="filterEstado" placeholder="Filtrar..." /></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of filteredResults; track item.CodiOrdMaqu) {
-            <tr (click)="selectRow(item)">
-              <td>{{ item.CodiOrdMaqu }}</td>
-              <td>{{ item.CodiMaqu }}</td>
-              <td>{{ item.Fecha_inicio | date:'yyyy-MM-dd HH:mm' }}</td>
-              <td>{{ item.TipoMant }}</td>
-              <td>
-                <span class="badge estado-{{ item.IdEsta }}">{{ item.NombreEstado }}</span>
-              </td>
-            </tr>
-          } @empty {
+    <section class="results-panel">
+      <div class="results-header">
+        <div>
+          <span class="modal-kicker">Resultados</span>
+          <h3>Listado de órdenes</h3>
+        </div>
+        <span class="count-pill">{{ filteredResults.length }} registros</span>
+      </div>
+
+      <div class="modal-table">
+        <table>
+          <thead>
             <tr>
-              <td colspan="5" class="no-data">No hay órdenes registradas.</td>
+              <th>Código Orden</th>
+              <th>Código Máquina</th>
+              <th>Fecha Inicio</th>
+              <th>Tipo Mantenimiento</th>
+              <th>Estado</th>
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-
+            <tr class="filters-row">
+              <th><input type="text" [(ngModel)]="filterCodiOrd" placeholder="Filtrar" /></th>
+              <th><input type="text" [(ngModel)]="filterCodiMaqu" placeholder="Filtrar" /></th>
+              <th></th>
+              <th><input type="text" [(ngModel)]="filterTipoMant" placeholder="Filtrar" /></th>
+              <th><input type="text" [(ngModel)]="filterEstado" placeholder="Filtrar" /></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filteredResults; track item.CodiOrdMaqu) {
+              <tr (click)="selectRow(item)">
+                <td><code>{{ item.CodiOrdMaqu }}</code></td>
+                <td>{{ item.CodiMaqu }}</td>
+                <td>{{ item.Fecha_inicio | date:'yyyy-MM-dd HH:mm' }}</td>
+                <td>{{ item.TipoMant }}</td>
+                <td>
+                  <span class="badge estado-{{ item.IdEsta }}">{{ item.NombreEstado }}</span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="no-data">No hay órdenes registradas.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
   </div>
 </div>

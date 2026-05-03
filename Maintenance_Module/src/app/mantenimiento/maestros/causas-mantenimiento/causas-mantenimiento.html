@@ -1,191 +1,83 @@
-<!-- ═══════════════ PAGE ═══════════════ -->
-<div class="page-container">
-  <h1 class="page-title">Causas de Mantenimiento</h1>
-
-  <!-- ═══════════════ NOTIFICATION ═══════════════ -->
-  @if (notification()) {
-  <div class="notification" [class.success]="notification()!.type === 'success'"
-    [class.error]="notification()!.type === 'error'">
-    <span class="notification-icon">{{ notification()!.type === 'success' ? '✅' : '⚠️' }}</span>
-    <span class="notification-text">{{ notification()!.message }}</span>
-    <button class="notification-close" (click)="notification.set(null)">✕</button>
-  </div>
-  }
-
-  <!-- ═══════════════ SEARCH CARD ═══════════════ -->
-  <div class="selector-card">
-    <div class="selector-header">
-      <span class="selector-icon">🔍</span>
-      <h2>Buscar Causas</h2>
+<div class="parts-page">
+  <section class="page-hero">
+    <div>
+      <h2>Causas de Mantenimiento</h2>
+      <p>Administre las causas que originan intervenciones preventivas, correctivas o reactivas.</p>
     </div>
-    <div class="selector-body">
-      <div class="search-box">
-        <label>Buscar por nombre o código de causa</label>
-        <div class="search-input-wrapper">
-          <input type="text" placeholder="Escriba para filtrar..." [ngModel]="searchTerm()"
-            (ngModelChange)="searchTerm.set($event)" />
-          <span class="search-icon">🔍</span>
-        </div>
+    <button type="button" class="btn-search hero-action" (click)="openModal()" title="Buscar causas">
+      <span class="button-icon">🔍</span>
+      Buscar causas
+    </button>
+  </section>
+
+  <section class="form-panel">
+    <div class="panel-header">
+      <div>
+        <span class="section-kicker">Ficha de causa</span>
+        <h3>Información general</h3>
       </div>
     </div>
-  </div>
 
-  <!-- ═══════════════ REGISTER CAUSE FORM ═══════════════ -->
-  <div class="form-card">
-    <div class="form-header">
-      <span class="form-icon">📋</span>
-      <h2>{{ editingCausa() ? 'Editar Causa' : 'Registrar Nueva Causa' }}</h2>
-    </div>
-    <div class="form-body">
-      <form (ngSubmit)="saveCausa(causaForm)" #causaForm="ngForm">
-        <div class="form-grid">
-          <div class="field-group">
-            <label>Código <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="formData.cause_code" name="cause_code" required
-              placeholder="Ej: CM-001" />
-          </div>
-
-          <div class="field-group">
-            <label>Nombre <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="formData.cause_name" name="cause_name" required
-              placeholder="Nombre de la causa" />
-          </div>
-
-          <div class="field-group">
-            <label>Tipo <span class="required">*</span></label>
-            <select [(ngModel)]="formData.cause_type" name="cause_type" required>
-              <option value="Mantenimiento">Mantenimiento</option>
-              <option value="Falla">Falla</option>
-            </select>
-          </div>
-
-          <div class="field-group field-group--wide">
-            <label>Descripción</label>
-            <input type="text" [(ngModel)]="formData.description" name="description"
-              placeholder="Descripción opcional de la causa" />
-          </div>
-
-          <div class="field-action">
-            <button class="btn-register" type="submit" [disabled]="!causaForm.valid">
-              <span>💾</span>
-              {{ editingCausa() ? 'Guardar' : 'Registrar' }}
-            </button>
-            @if (editingCausa()) {
-            <button class="btn-cancel" type="button" (click)="cancelEdit(causaForm)">
-              Cancelar
-            </button>
-            }
-          </div>
-        </div>
-
-        @if (!causaForm.valid && causaForm.submitted) {
-        <p class="hint-message">⚠️ Complete todos los campos obligatorios.</p>
-        }
-      </form>
-    </div>
-  </div>
-
-  <!-- ═══════════════ CAUSES TABLE ═══════════════ -->
-  <div class="sheet-card">
-    <div class="sheet-header">
-      <div class="sheet-title-row">
-        <span class="sheet-icon">📑</span>
-        <h2>Listado de Causas</h2>
+    <div class="form-container">
+      <div class="form-group">
+        <label>ID causa</label>
+        <input type="number" placeholder="Ej: 1" [(ngModel)]="idCausMant" name="idCausMant" />
       </div>
-      <span class="sheet-machine-tag">{{ filteredCausas().length }} registros</span>
-    </div>
 
-    @if (filteredCausas().length > 0) {
-    <div class="table-container">
-      <table class="parts-table">
-        <thead>
-          <tr>
-            <th class="col-num">#</th>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Descripción</th>
-            <th class="col-actions">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (c of filteredCausas(); track c.id; let i = $index) {
-          @if (editingInlineId() === c.id) {
-          <tr class="editing-row">
-            <td class="col-num">{{ i + 1 }}</td>
-            <td><input class="inline-input" [(ngModel)]="inlineData.cause_code"
-                [ngModelOptions]="{standalone: true}" /></td>
-            <td><input class="inline-input" [(ngModel)]="inlineData.cause_name"
-                [ngModelOptions]="{standalone: true}" /></td>
-            <td>
-              <select class="inline-select" [(ngModel)]="inlineData.cause_type"
-                [ngModelOptions]="{standalone: true}">
-                <option value="Mantenimiento">Mantenimiento</option>
-                <option value="Falla">Falla</option>
-              </select>
-            </td>
-            <td><input class="inline-input" [(ngModel)]="inlineData.description"
-                [ngModelOptions]="{standalone: true}" /></td>
-            <td class="col-actions">
-              <div class="action-group">
-                <button class="btn-save-inline" title="Guardar" (click)="saveInlineEdit()">✅</button>
-                <button class="btn-cancel-inline" title="Cancelar" (click)="cancelInlineEdit()">❌</button>
-              </div>
-            </td>
-          </tr>
-          } @else {
-          <tr>
-            <td class="col-num">{{ i + 1 }}</td>
-            <td><code>{{ c.cause_code }}</code></td>
-            <td>{{ c.cause_name }}</td>
-            <td>
-              <span class="type-badge" [class.type-mantenimiento]="c.cause_type === 'Mantenimiento'"
-                [class.type-falla]="c.cause_type === 'Falla'">
-                {{ c.cause_type }}
-              </span>
-            </td>
-            <td class="col-description">{{ c.description || '—' }}</td>
-            <td class="col-actions">
-              <div class="action-group">
-                <button class="btn-edit" title="Editar" (click)="startInlineEdit(c)">✏️</button>
-                <button class="btn-delete" title="Eliminar" (click)="deletingId.set(c.id)">🗑️</button>
-              </div>
-            </td>
-          </tr>
-          }
-          }
-        </tbody>
-      </table>
+      <div class="form-group">
+        <label>Código causa</label>
+        <input type="text" placeholder="Ej: FALLA_ELEC" [(ngModel)]="codiCaus" name="codiCaus" />
+      </div>
+
+      <div class="form-group">
+        <label>Nombre causa</label>
+        <input type="text" placeholder="Ej: Falla eléctrica" [(ngModel)]="nombCaus" name="nombCaus" />
+      </div>
+
+      <div class="form-group">
+        <label>Descripción</label>
+        <input
+          type="text"
+          placeholder="Ej: Problemas relacionados con cableado o sensores"
+          [(ngModel)]="descri"
+          name="descri"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Tipo Mantenimiento</label>
+        <select [(ngModel)]="tipoMant" name="tipoMant">
+          <option value="">Seleccione</option>
+          <option value="Preventivo">Preventivo</option>
+          <option value="Correctivo">Correctivo</option>
+          <option value="Reactivo">Reactivo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Activo</label>
+        <select [(ngModel)]="activo" name="activo">
+          <option [ngValue]="1">Activo</option>
+          <option [ngValue]="0">Inactivo</option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-primary" (click)="handleCause(1)">
+          <span class="button-icon">💾</span>
+          Guardar
+        </button>
+        <button type="button" class="btn-danger" (click)="handleCause(2)">
+          <span class="button-icon">🗑️</span>
+          Eliminar
+        </button>
+      </div>
     </div>
-    <div class="table-footer">
-      Total: {{ filteredCausas().length }} causas registradas
-    </div>
-    } @else {
-    <div class="empty-state">
-      <span class="empty-icon">📦</span>
-      <p>No se encontraron causas. Registre una nueva usando el formulario superior.</p>
-    </div>
-    }
-  </div>
+  </section>
 </div>
 
-<!-- ═══════════════ DELETE CONFIRMATION MODAL ═══════════════ -->
-@if (deletingId() !== null) {
-<div class="modal-overlay" (click)="deletingId.set(null)">
-  <div class="modal-box" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <span class="modal-icon">⚠️</span>
-      <h3>Confirmar Eliminación</h3>
-    </div>
-    <p class="modal-message">
-      ¿Está seguro de que desea eliminar la causa
-      <code>{{ getDeletingCausa()?.cause_code }}</code>?
-    </p>
-    <p class="modal-warning">Esta acción no se puede deshacer.</p>
-    <div class="modal-actions">
-      <button class="btn-modal-cancel" (click)="deletingId.set(null)">Cancelar</button>
-      <button class="btn-modal-confirm" (click)="confirmDelete(deletingId()!)">Eliminar</button>
-    </div>
-  </div>
-</div>
-}
+<app-causas-mantenimiento-modal
+  *ngIf="showModal"
+  (close)="closeModal()"
+  (select)="fillForm($event)">
+</app-causas-mantenimiento-modal>

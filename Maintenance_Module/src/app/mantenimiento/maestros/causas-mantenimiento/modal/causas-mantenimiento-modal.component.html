@@ -41,12 +41,16 @@
 
           <tbody>
             <tr *ngFor="let item of filteredResults" (click)="selectRow(item)">
-              <td><code>{{ item['ID Causa Mantenimiento'] }}</code></td>
-              <td>{{ item['Codigo Causa'] }}</td>
-              <td>{{ item['Nombre Causa'] }}</td>
-              <td>{{ item['Descripcion'] }}</td>
-              <td>{{ item.TipoMant || item['Tipo Mantenimiento'] }}</td>
-              <td>{{ item['Activo'] }}</td>
+              <td><code>{{ item.IdCausMant || '-' }}</code></td>
+              <td>{{ item.CodiCaus || '-' }}</td>
+              <td>{{ item.NombCaus || '-' }}</td>
+              <td>{{ item.Descri || '-' }}</td>
+              <td>{{ item.TipoMant || '-' }}</td>
+              <td>
+                <span class="status-pill" [class.inactive]="!item.Activo">
+                  {{ formatActivo(item.Activo) }}
+                </span>
+              </td>
             </tr>
 
             <tr *ngIf="results.length === 0">

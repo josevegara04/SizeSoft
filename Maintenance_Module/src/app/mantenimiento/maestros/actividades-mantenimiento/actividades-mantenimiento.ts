@@ -22,12 +22,16 @@ export class ActividadesMantenimientoComponent {
 
   showModal = false;
 
-  idActiMant: number | null = null;
-  codiActi = '';
-  nombActi = '';
-  descri = '';
-  tipoMant = '';
-  activo = 1;
+  IdActiMant: number | null = null;
+  CodiActi = '';
+  NombActi = '';
+  Descri = '';
+  TipoMant = '';
+  Activo = 1;
+
+  get isEditing(): boolean {
+    return this.IdActiMant !== null && this.IdActiMant !== undefined;
+  }
 
   openModal(): void {
     this.showModal = true;
@@ -38,40 +42,49 @@ export class ActividadesMantenimientoComponent {
   }
 
   fillForm(item: any): void {
-    this.idActiMant = this.toNumber(item['ID Actividad Mantenimiento']);
-    this.codiActi = item['Codigo Actividad'] || '';
-    this.nombActi = item['Nombre Actividad'] || '';
-    this.descri = item['Descripcion'] || '';
-    this.tipoMant = item.TipoMant || item['Tipo Mantenimiento'] || '';
-    this.activo = this.toNumber(item['Activo'], 1) ?? 1;
+    this.IdActiMant = this.toNumber(item.IdActiMant ?? item['ID Actividad Mantenimiento']);
+    this.CodiActi = item.CodiActi || item['Codigo Actividad'] || '';
+    this.NombActi = item.NombActi || item['Nombre Actividad'] || '';
+    this.Descri = item.Descri || item['Descripcion'] || '';
+    this.TipoMant = item.TipoMant || item['Tipo Mantenimiento'] || '';
+    this.Activo = this.toNumber(item['Activo'], 1) ?? 1;
     this.closeModal();
   }
 
+  clearForm(): void {
+    this.IdActiMant = null;
+    this.CodiActi = '';
+    this.NombActi = '';
+    this.Descri = '';
+    this.TipoMant = '';
+    this.Activo = 1;
+  }
+
   handleActivity(action: number): void {
-    if (action === 1) {
+    if (action === 1 || action === 3) {
       if (
-        this.idActiMant === null ||
-        this.idActiMant === undefined ||
-        !this.codiActi ||
-        !this.nombActi ||
-        !this.descri ||
-        !this.tipoMant
+        this.IdActiMant === null ||
+        this.IdActiMant === undefined ||
+        !this.CodiActi ||
+        !this.NombActi ||
+        !this.Descri ||
+        !this.TipoMant
       ) {
         this.sidebarService.addLog('Llena todos los campos obligatorios');
         return;
       }
-    } else if (this.idActiMant === null || this.idActiMant === undefined) {
-      this.sidebarService.addLog('Indica el ID de la actividad a eliminar');
+    } else if (this.IdActiMant === null || this.IdActiMant === undefined) {
+      this.sidebarService.addLog('Selecciona la actividad que deseas eliminar');
       return;
     }
 
     const body = [{
-      IdActiMant: Number(this.idActiMant),
-      CodiActi: this.codiActi,
-      NombActi: this.nombActi,
-      Descri: this.descri,
-      TipoMant: this.tipoMant,
-      Activo: Number(this.activo),
+      IdActiMant: Number(this.IdActiMant),
+      CodiActi: this.CodiActi,
+      NombActi: this.NombActi,
+      Descri: this.Descri,
+      TipoMant: this.TipoMant,
+      Activo: Number(this.Activo),
       CodiComp: this.apiService.clsUser.CodiComp,
       Entidad: 307,
       Token: this.apiService.lstrToken,
@@ -81,6 +94,9 @@ export class ActividadesMantenimientoComponent {
     this.actividadesService.save(body).subscribe({
       next: (res) => {
         this.sidebarService.addLog(this.extractMessage(res, 'Operación completada'));
+        if (action === 2) {
+          this.clearForm();
+        }
       },
       error: () => {
         this.sidebarService.addLog('Error al realizar la operación');

@@ -66,10 +66,12 @@ export class SidebarComponent implements AfterViewChecked {
       next: (res) => {
         this.messages.push({ role: 'bot', content: res.response });
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.messages.push({ role: 'bot', content: 'Error al conectar con el asistente. Intenta de nuevo.' });
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

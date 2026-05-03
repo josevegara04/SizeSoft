@@ -21,17 +21,17 @@
     <div class="form-container">
       <div class="form-group">
         <label>ID actividad</label>
-        <input type="number" placeholder="Ej: 1" [(ngModel)]="idActiMant" name="idActiMant" />
+        <input type="number" placeholder="Ej: 1" [(ngModel)]="IdActiMant" name="idActiMant" />
       </div>
 
       <div class="form-group">
         <label>Código actividad</label>
-        <input type="text" placeholder="Ej: LUBRICARR" [(ngModel)]="codiActi" name="codiActi" />
+        <input type="text" placeholder="Ej: LUBRICARR" [(ngModel)]="CodiActi" name="codiActi" />
       </div>
 
       <div class="form-group">
         <label>Nombre actividad</label>
-        <input type="text" placeholder="Ej: Lubricar componentes" [(ngModel)]="nombActi" name="nombActi" />
+        <input type="text" placeholder="Ej: Lubricar componentes" [(ngModel)]="NombActi" name="nombActi" />
       </div>
 
       <div class="form-group">
@@ -39,14 +39,14 @@
         <input
           type="text"
           placeholder="Ej: Aplicar lubricante en piezas móviles"
-          [(ngModel)]="descri"
+          [(ngModel)]="Descri"
           name="descri"
         />
       </div>
 
       <div class="form-group">
         <label>Tipo Mantenimiento</label>
-        <select [(ngModel)]="tipoMant" name="tipoMant">
+        <select [(ngModel)]="TipoMant" name="tipoMant">
           <option value="">Seleccione</option>
           <option value="Preventivo">Preventivo</option>
           <option value="Correctivo">Correctivo</option>
@@ -56,21 +56,34 @@
 
       <div class="form-group">
         <label>Activo</label>
-        <select [(ngModel)]="activo" name="activo">
+        <select [(ngModel)]="Activo" name="activo">
           <option [ngValue]="1">Activo</option>
           <option [ngValue]="0">Inactivo</option>
         </select>
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn-primary" (click)="handleActivity(1)">
-          <span class="button-icon">💾</span>
-          Guardar
+        <button type="button" class="btn-secondary" (click)="clearForm()">
+          Limpiar
         </button>
-        <button type="button" class="btn-danger" (click)="handleActivity(2)">
-          <span class="button-icon">🗑️</span>
-          Eliminar
-        </button>
+
+        @if (!isEditing) {
+          <button type="button" class="btn-primary" (click)="handleActivity(1)">
+            <span class="button-icon">💾</span>
+            Guardar
+          </button>
+        }
+
+        @if (isEditing) {
+          <button type="button" class="btn-primary" (click)="handleActivity(3)">
+            <span class="button-icon">✏️</span>
+            Guardar cambios
+          </button>
+          <button type="button" class="btn-danger" (click)="handleActivity(2)">
+            <span class="button-icon">🗑️</span>
+            Eliminar
+          </button>
+        }
       </div>
     </div>
   </section>

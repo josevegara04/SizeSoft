@@ -16,6 +16,7 @@ export class ActividadesMantenimientoModalComponent implements OnInit {
   @Output() select = new EventEmitter<any>();
 
   results: any[] = [];
+  rawResults: any[] = [];
 
   filterIdActiMant = '';
   filterCodiActi = '';
@@ -36,29 +37,48 @@ export class ActividadesMantenimientoModalComponent implements OnInit {
 
   get filteredResults() {
     return this.results.filter((item) => (
-      (!this.filterIdActiMant || String(item['ID Actividad Mantenimiento'] ?? '').includes(this.filterIdActiMant)) &&
-      (!this.filterCodiActi || String(item['Codigo Actividad'] ?? '').toLowerCase().includes(this.filterCodiActi.toLowerCase())) &&
-      (!this.filterNombActi || String(item['Nombre Actividad'] ?? '').toLowerCase().includes(this.filterNombActi.toLowerCase())) &&
-      (!this.filterDescri || String(item['Descripcion'] ?? '').toLowerCase().includes(this.filterDescri.toLowerCase())) &&
-      (!this.filterTipoMant || String(item.TipoMant || item['Tipo Mantenimiento'] || '').toLowerCase().includes(this.filterTipoMant.toLowerCase())) &&
-      (!this.filterActivo || String(item['Activo'] ?? '').includes(this.filterActivo))
+      (!this.filterIdActiMant || String(item.IdActiMant ?? '').includes(this.filterIdActiMant)) &&
+      (!this.filterCodiActi || String(item.CodiActi ?? '').toLowerCase().includes(this.filterCodiActi.toLowerCase())) &&
+      (!this.filterNombActi || String(item.NombActi ?? '').toLowerCase().includes(this.filterNombActi.toLowerCase())) &&
+      (!this.filterDescri || String(item.Descri ?? '').toLowerCase().includes(this.filterDescri.toLowerCase())) &&
+      (!this.filterTipoMant || String(item.TipoMant ?? '').toLowerCase().includes(this.filterTipoMant.toLowerCase())) &&
+      (!this.filterActivo || this.formatActivo(item.Activo).toLowerCase().includes(this.filterActivo.toLowerCase()))
     ));
+  }
+
+  formatActivo(value: boolean | number | string | null | undefined): string {
+    return value === true || value === 1 || value === '1' ? 'Sí' : 'No';
+  }
+
+  private normalizeActividad(item: any): any {
+    return {
+      ...item,
+      IdActiMant: item.IdActiMant ?? item.IdActividadMant ?? item['ID Actividad Mantenimiento'] ?? item['ID Actividad'] ?? '',
+      CodiComp: item.CodiComp ?? item['Codigo Compañia'] ?? item['Código Compañía'] ?? '',
+      CodiActi: item.CodiActi ?? item.CodiActividad ?? item['Codigo Actividad'] ?? item['Código Actividad'] ?? item.Código ?? item.Codigo ?? '',
+      NombActi: item.NombActi ?? item.NombreActividad ?? item['Nombre Actividad'] ?? item.Nombre ?? '',
+      Descri: item.Descri ?? item.Descripcion ?? item.Descripción ?? item['Descripcion'] ?? item['Descripción'] ?? '',
+      TipoMant: item.TipoMant ?? item['Tipo Mantenimiento'] ?? item.TipoMantenimiento ?? '',
+      Activo: item.Activo ?? item.activo ?? 0,
+    };
   }
 
   handleSearch(): void {
     this.actividadesService.search([{
       CodiCons: 'ActiMant',
-      NombPara: 'Comp',
+      NombPara: 'Codigo Compañia',
       Valor: this.apiService.clsUser.CodiComp,
       CodiComp: this.apiService.clsUser.CodiComp,
       Token: this.apiService.lstrToken,
       Report: '0',
     }]).subscribe({
       next: (res) => {
-        this.results = Array.isArray(res) ? [...res] : [];
+        this.rawResults = Array.isArray(res) ? [...res] : [];
+        this.results = this.rawResults.map((item) => this.normalizeActividad(item));
         this.cdr.detectChanges();
       },
       error: () => {
+        this.rawResults = [];
         this.results = [];
       },
     });

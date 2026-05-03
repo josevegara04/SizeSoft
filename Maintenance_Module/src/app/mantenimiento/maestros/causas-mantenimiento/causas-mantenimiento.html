@@ -21,17 +21,17 @@
     <div class="form-container">
       <div class="form-group">
         <label>ID causa</label>
-        <input type="number" placeholder="Ej: 1" [(ngModel)]="idCausMant" name="idCausMant" />
+        <input type="number" placeholder="Ej: 1" [(ngModel)]="IdCausMant" name="idCausMant" />
       </div>
 
       <div class="form-group">
         <label>Código causa</label>
-        <input type="text" placeholder="Ej: FALLA_ELEC" [(ngModel)]="codiCaus" name="codiCaus" />
+        <input type="text" placeholder="Ej: FALLA_ELEC" [(ngModel)]="CodiCaus" name="codiCaus" />
       </div>
 
       <div class="form-group">
         <label>Nombre causa</label>
-        <input type="text" placeholder="Ej: Falla eléctrica" [(ngModel)]="nombCaus" name="nombCaus" />
+        <input type="text" placeholder="Ej: Falla eléctrica" [(ngModel)]="NombCaus" name="nombCaus" />
       </div>
 
       <div class="form-group">
@@ -39,14 +39,14 @@
         <input
           type="text"
           placeholder="Ej: Problemas relacionados con cableado o sensores"
-          [(ngModel)]="descri"
+          [(ngModel)]="Descri"
           name="descri"
         />
       </div>
 
       <div class="form-group">
         <label>Tipo Mantenimiento</label>
-        <select [(ngModel)]="tipoMant" name="tipoMant">
+        <select [(ngModel)]="TipoMant" name="tipoMant">
           <option value="">Seleccione</option>
           <option value="Preventivo">Preventivo</option>
           <option value="Correctivo">Correctivo</option>
@@ -56,21 +56,34 @@
 
       <div class="form-group">
         <label>Activo</label>
-        <select [(ngModel)]="activo" name="activo">
+        <select [(ngModel)]="Activo" name="activo">
           <option [ngValue]="1">Activo</option>
           <option [ngValue]="0">Inactivo</option>
         </select>
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn-primary" (click)="handleCause(1)">
-          <span class="button-icon">💾</span>
-          Guardar
+        <button type="button" class="btn-secondary" (click)="clearForm()">
+          Limpiar
         </button>
-        <button type="button" class="btn-danger" (click)="handleCause(2)">
-          <span class="button-icon">🗑️</span>
-          Eliminar
-        </button>
+
+        @if (!isEditing) {
+          <button type="button" class="btn-primary" (click)="handleCause(1)">
+            <span class="button-icon">💾</span>
+            Guardar
+          </button>
+        }
+
+        @if (isEditing) {
+          <button type="button" class="btn-primary" (click)="handleCause(3)">
+            <span class="button-icon">✏️</span>
+            Guardar cambios
+          </button>
+          <button type="button" class="btn-danger" (click)="handleCause(2)">
+            <span class="button-icon">🗑️</span>
+            Eliminar
+          </button>
+        }
       </div>
     </div>
   </section>

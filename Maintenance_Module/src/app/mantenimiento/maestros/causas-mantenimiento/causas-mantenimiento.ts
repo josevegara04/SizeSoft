@@ -22,12 +22,16 @@ export class CausasMantenimientoComponent {
 
   showModal = false;
 
-  idCausMant: number | null = null;
-  codiCaus = '';
-  nombCaus = '';
-  descri = '';
-  tipoMant = '';
-  activo = 1;
+  IdCausMant: number | null = null;
+  CodiCaus = '';
+  NombCaus = '';
+  Descri = '';
+  TipoMant = '';
+  Activo = 1;
+
+  get isEditing(): boolean {
+    return this.IdCausMant !== null && this.IdCausMant !== undefined;
+  }
 
   openModal(): void {
     this.showModal = true;
@@ -38,40 +42,49 @@ export class CausasMantenimientoComponent {
   }
 
   fillForm(item: any): void {
-    this.idCausMant = this.toNumber(item['ID Causa Mantenimiento']);
-    this.codiCaus = item['Codigo Causa'] || '';
-    this.nombCaus = item['Nombre Causa'] || '';
-    this.descri = item['Descripcion'] || '';
-    this.tipoMant = item.TipoMant || item['Tipo Mantenimiento'] || '';
-    this.activo = this.toNumber(item['Activo'], 1) ?? 1;
+    this.IdCausMant = this.toNumber(item.IdCausMant ?? item['ID Causa Mantenimiento']);
+    this.CodiCaus = item.CodiCaus || item['Codigo Causa'] || '';
+    this.NombCaus = item.NombCaus || item['Nombre Causa'] || '';
+    this.Descri = item.Descri || item['Descripcion'] || '';
+    this.TipoMant = item.TipoMant || item['Tipo Mantenimiento'] || '';
+    this.Activo = this.toNumber(item['Activo'], 1) ?? 1;
     this.closeModal();
   }
 
+  clearForm(): void {
+    this.IdCausMant = null;
+    this.CodiCaus = '';
+    this.NombCaus = '';
+    this.Descri = '';
+    this.TipoMant = '';
+    this.Activo = 1;
+  }
+
   handleCause(action: number): void {
-    if (action === 1) {
+    if (action === 1 || action === 3) {
       if (
-        this.idCausMant === null ||
-        this.idCausMant === undefined ||
-        !this.codiCaus ||
-        !this.nombCaus ||
-        !this.descri ||
-        !this.tipoMant
+        this.IdCausMant === null ||
+        this.IdCausMant === undefined ||
+        !this.CodiCaus ||
+        !this.NombCaus ||
+        !this.Descri ||
+        !this.TipoMant
       ) {
         this.sidebarService.addLog('Llena todos los campos obligatorios');
         return;
       }
-    } else if (this.idCausMant === null || this.idCausMant === undefined) {
-      this.sidebarService.addLog('Indica el ID de la causa a eliminar');
+    } else if (this.IdCausMant === null || this.IdCausMant === undefined) {
+      this.sidebarService.addLog('Selecciona la causa que deseas eliminar');
       return;
     }
 
     const body = [{
-      IdCausMant: Number(this.idCausMant),
-      CodiCaus: this.codiCaus,
-      NombCaus: this.nombCaus,
-      Descri: this.descri,
-      TipoMant: this.tipoMant,
-      Activo: Number(this.activo),
+      IdCausMant: Number(this.IdCausMant),
+      CodiCaus: this.CodiCaus,
+      NombCaus: this.NombCaus,
+      Descri: this.Descri,
+      TipoMant: this.TipoMant,
+      Activo: Number(this.Activo),
       CodiComp: this.apiService.clsUser.CodiComp,
       Entidad: 306,
       Token: this.apiService.lstrToken,
@@ -81,6 +94,9 @@ export class CausasMantenimientoComponent {
     this.causasService.save(body).subscribe({
       next: (res) => {
         this.sidebarService.addLog(this.extractMessage(res, 'Operación completada'));
+        if (action === 2) {
+          this.clearForm();
+        }
       },
       error: () => {
         this.sidebarService.addLog('Error al realizar la operación');

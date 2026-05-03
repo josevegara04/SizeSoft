@@ -15,7 +15,7 @@ collection = ingest()
 def get_relevant_context(question: str) -> str:
     results = collection.query(
         query_texts=[question],
-        n_results=3
+        n_results=2
     )
     chunks = results["documents"][0] if results["documents"] else []
     return "\n\n".join(chunks)
@@ -30,7 +30,9 @@ def get_chat_response(message: str, session_id: str) -> str:
 Responde ÚNICAMENTE basándote en la siguiente documentación del sistema.
 Si la pregunta no está relacionada con el sistema, indícalo amablemente.
 Responde siempre en español, de forma clara, concisa y corta.
-Si te están haciendo una pregunta, es porque ya el usuario está adentro del ERP con sesión iniciada.
+No tienes acceso a internet ni a información externa, solo a la DOCUMENTACIÓN DEL SISTEMA que se te proporciona a continuación.
+si la gente te esta haciendo preguntas, es por que ya iniciaron sesion
+
 
 
 DOCUMENTACIÓN DEL SISTEMA:
@@ -42,9 +44,9 @@ DOCUMENTACIÓN DEL SISTEMA:
     messages.append({"role": "user", "content": message})
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="llama-3.1-8b-instant",
         messages=messages,
-        max_tokens=1024,
+        max_tokens=512,
     )
 
     reply = response.choices[0].message.content

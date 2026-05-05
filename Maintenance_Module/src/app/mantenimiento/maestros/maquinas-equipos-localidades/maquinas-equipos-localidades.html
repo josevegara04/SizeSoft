@@ -31,16 +31,12 @@
 
       <div class="form-group">
         <label>Tipo Parte</label>
-        <input
-          type="text"
-          list="tiposParte"
-          placeholder="Ej: Filtración"
-          [(ngModel)]="tipoParteNombre"
-          name="tipoParteNombre"
-        />
-        <datalist id="tiposParte">
-          <option *ngFor="let tipoParte of tiposParte" [value]="tipoParte.nombre"></option>
-        </datalist>
+        <select [(ngModel)]="tipoParteId" name="tipoParteId">
+          <option [ngValue]="null">Seleccione</option>
+          <option *ngFor="let tipoParte of tiposParte" [ngValue]="tipoParte.id">
+            {{ tipoParte.nombre }}
+          </option>
+        </select>
       </div>
 
       <div class="form-group">
@@ -54,14 +50,27 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn-primary" (click)="handlePart(1)">
-          <span class="button-icon">💾</span>
-          Guardar
+        <button type="button" class="btn-secondary" (click)="clearForm()">
+          Limpiar
         </button>
-        <button type="button" class="btn-danger" (click)="handlePart(2)">
-          <span class="button-icon">🗑️</span>
-          Eliminar
-        </button>
+
+        @if (!isEditing) {
+          <button type="button" class="btn-primary" (click)="handlePart(1)">
+            <span class="button-icon">💾</span>
+            Guardar
+          </button>
+        }
+
+        @if (isEditing) {
+          <button type="button" class="btn-primary" (click)="handlePart(1)">
+            <span class="button-icon">✏️</span>
+            Guardar cambios
+          </button>
+          <button type="button" class="btn-danger" (click)="handlePart(2)">
+            <span class="button-icon">🗑️</span>
+            Eliminar
+          </button>
+        }
       </div>
     </div>
   </section>
@@ -69,5 +78,6 @@
 
 <app-partes-modal
   *ngIf="showModal"
-  (close)="closeModal()">
+  (close)="closeModal()"
+  (select)="fillForm($event)">
 </app-partes-modal>

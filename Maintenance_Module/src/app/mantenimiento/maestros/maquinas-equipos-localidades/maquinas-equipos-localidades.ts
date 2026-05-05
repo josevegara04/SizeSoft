@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PartesMaquinaService } from './services/partes-maquina.service';
 import { ApiService } from '../../../services/api.service';
 import { SidebarService } from '../../../side-bar/sidebar.service';
 import { PartesModalComponent } from './modal/partes-modal.component';
 import { CommonModule } from '@angular/common';
-import { TIPOS_PARTE_TEMPORALES, findTipoParteByName } from './tipo-parte-options';
+import { TipoParteOption } from './tipo-parte-options';
 
 @Component({
   selector: 'app-partes-maquina',
@@ -14,7 +14,7 @@ import { TIPOS_PARTE_TEMPORALES, findTipoParteByName } from './tipo-parte-option
   templateUrl: './maquinas-equipos-localidades.html',
   styleUrls: ['./maquinas-equipos-localidades.css']
 })
-export class MaquinasEquiposLocalidadesComponent {
+export class MaquinasEquiposLocalidadesComponent implements OnInit {
 
   // Construcutor
   constructor(
@@ -36,9 +36,14 @@ export class MaquinasEquiposLocalidadesComponent {
   // Main variables
   CodiPart: string = '';
   CodiMaqu: string = '';
-  tipoParteNombre: string = '';
+  tipoParteId: number | null = null;
   nombreParte: string = '';
-  tiposParte = TIPOS_PARTE_TEMPORALES;
+  tiposParte: TipoParteOption[] = [];
+  isEditing = false;
+
+  ngOnInit(): void {
+    this.loadTiposParte();
+  }
 
   private get companyCode(): string {
     return this.apiService.clsUser.CodiComp;
@@ -48,22 +53,59 @@ export class MaquinasEquiposLocalidadesComponent {
     return this.apiService.lstrToken;
   }
 
+  fillForm(item: any): void {
+    this.CodiPart = item.CodiPart ?? '';
+    this.CodiMaqu = item.CodiMaqu ?? '';
+    this.tipoParteId = this.toNumber(item.IdTipoPartReal ?? item.IdTipoPart);
+    this.nombreParte = item.NombreParte ?? '';
+    this.isEditing = true;
+    this.closeModal();
+  }
+
+  clearForm(): void {
+    this.CodiPart = '';
+    this.CodiMaqu = '';
+    this.tipoParteId = null;
+    this.nombreParte = '';
+    this.isEditing = false;
+  }
+
+  private loadTiposParte(): void {
+    const body = [{
+      CodiCons: 'TipoPart',
+      NombPara: 'Codigo Compañia',
+      Valor: this.companyCode,
+      CodiComp: this.companyCode,
+      Token: this.token,
+      Report: '0'
+    }];
+
+    this.partesService.searchTiposParte(body).subscribe({
+      next: (res) => {
+        this.tiposParte = Array.isArray(res)
+          ? res.map((item: any) => ({
+              id: Number(item.Id ?? 0),
+              nombre: item.Nomb ?? '',
+              descripcion: item.Descripcion ?? ''
+            })).filter((item: TipoParteOption) => item.id > 0 && !!item.nombre)
+          : [];
+      },
+      error: () => {
+        this.tiposParte = [];
+        this.sidebarService.addLog('No se pudieron cargar los tipos de parte');
+      }
+    });
+  }
+
   // Create or update machine part
   handlePart(action: number) {
 
     // validation when saving / updating
     if (action === 1) {
-      if (!this.CodiPart || !this.CodiMaqu || !this.tipoParteNombre || !this.nombreParte) {
+      if (!this.CodiPart || !this.CodiMaqu || !this.tipoParteId || !this.nombreParte) {
         this.sidebarService.addLog('Faltan campos para guardar');
         return;
       }
-    }
-
-    const tipoParte = findTipoParteByName(this.tipoParteNombre);
-
-    if (action === 1 && !tipoParte) {
-      this.sidebarService.addLog('Selecciona un tipo de parte válido de la lista');
-      return;
     }
 
     // Validation when deleting
@@ -78,7 +120,7 @@ export class MaquinasEquiposLocalidadesComponent {
       {
         CodiPart: this.CodiPart.trim(),
         NombreParte: this.nombreParte.trim(),
-        IdTipoPart: tipoParte?.id ?? 0,
+        IdTipoPart: this.tipoParteId ?? 0,
         CodiMaqu: this.CodiMaqu.trim(),
         CodiComp: this.companyCode,
         Entidad: 300,
@@ -103,6 +145,10 @@ export class MaquinasEquiposLocalidadesComponent {
           const parsed = JSON.parse(raw);
       
           this.sidebarService.addLog(parsed.message);
+
+          if (parsed.success && action === 2) {
+            this.clearForm();
+          }
       
           if (!parsed.success) {
             console.error('Error lógico:', parsed.message);
@@ -117,5 +163,10 @@ export class MaquinasEquiposLocalidadesComponent {
         this.sidebarService.addLog('Error al guardar la parte');
       }
     });
+  }
+
+  private toNumber(value: any): number | null {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
   }
 }

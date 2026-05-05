@@ -21,6 +21,7 @@ export class CausasMantenimientoComponent {
   ) {}
 
   showModal = false;
+  private editingFromSearch = false;
 
   IdCausMant: number | null = null;
   CodiCaus = '';
@@ -30,7 +31,7 @@ export class CausasMantenimientoComponent {
   Activo = 1;
 
   get isEditing(): boolean {
-    return this.IdCausMant !== null && this.IdCausMant !== undefined;
+    return this.editingFromSearch;
   }
 
   openModal(): void {
@@ -42,6 +43,7 @@ export class CausasMantenimientoComponent {
   }
 
   fillForm(item: any): void {
+    this.editingFromSearch = true;
     this.IdCausMant = this.toNumber(item.IdCausMant ?? item['ID Causa Mantenimiento']);
     this.CodiCaus = item.CodiCaus || item['Codigo Causa'] || '';
     this.NombCaus = item.NombCaus || item['Nombre Causa'] || '';
@@ -52,6 +54,7 @@ export class CausasMantenimientoComponent {
   }
 
   clearForm(): void {
+    this.editingFromSearch = false;
     this.IdCausMant = null;
     this.CodiCaus = '';
     this.NombCaus = '';
@@ -63,8 +66,6 @@ export class CausasMantenimientoComponent {
   handleCause(action: number): void {
     if (action === 1 || action === 3) {
       if (
-        this.IdCausMant === null ||
-        this.IdCausMant === undefined ||
         !this.CodiCaus ||
         !this.NombCaus ||
         !this.Descri ||
@@ -79,7 +80,7 @@ export class CausasMantenimientoComponent {
     }
 
     const body = [{
-      IdCausMant: Number(this.IdCausMant),
+      IdCausMant: this.IdCausMant ?? 0,
       CodiCaus: this.CodiCaus,
       NombCaus: this.NombCaus,
       Descri: this.Descri,

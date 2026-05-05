@@ -1,18 +1,8 @@
-import { Component, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, Output, EventEmitter, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PartesMaquinaService } from '../services/partes-maquina.service';
 import { ApiService } from '../../../../services/api.service';
 import { CommonModule } from '@angular/common';
-import { TIPOS_PARTE_TEMPORALES, findTipoParteByName } from '../tipo-parte-options';
-
-interface PartQueryFilter {
-  CodiCons: 'ListPart';
-  NombPara: string;
-  Valor: string;
-  CodiComp: string;
-  Token: string;
-  Report: '0';
-}
 
 interface PartResult {
   CodiPart: string;
@@ -31,9 +21,14 @@ interface PartResult {
   templateUrl: './partes-modal.component.html',
   styleUrls: ['./partes-modal.component.css']
 })
-export class PartesModalComponent {
+export class PartesModalComponent implements OnInit {
 
   @Output() close = new EventEmitter<void>();
+  @Output() select = new EventEmitter<PartResult>();
+
+  ngOnInit(): void {
+    this.handleSearch();
+  }
 
   cerrarModal() {
     this.close.emit();
@@ -46,13 +41,6 @@ export class PartesModalComponent {
   ) {}
 
   results: PartResult[] = [];
-
-  // Main variables
-  CodiPart: string = '';
-  CodiMaqu: string = '';
-  tipoParteNombre: string = '';
-  nombreParte: string = '';
-  tiposParte = TIPOS_PARTE_TEMPORALES;
 
   // filtros tabla
   filterCodiPart: string = '';
@@ -82,54 +70,41 @@ export class PartesModalComponent {
     return this.apiService.lstrToken;
   }
 
-  private buildFilter(NombPara: string, Valor: string | number): PartQueryFilter {
+  private normalizeParte(item: any): PartResult {
     return {
-      CodiCons: 'ListPart',
-      NombPara,
-      Valor: String(Valor),
-      CodiComp: this.companyCode,
-      Token: this.token,
-      Report: '0'
+      CodiPart: item.CodiPart ?? item['Código Parte'] ?? item['Codigo Parte'] ?? '',
+      CodiComp: item.CodiComp ?? item['Código Compañía'] ?? item['Codigo Compañia'] ?? '',
+      CodiMaqu: item.CodiMaqu ?? item['Código Máquina'] ?? item['Codigo Máquina'] ?? item['Codigo Maquina'] ?? '',
+      NombreParte: item.NombreParte ?? item['Nombre Parte'] ?? '',
+      IdTipoPart: Number(item.IdTipoPart ?? item['ID Tipo Parte'] ?? 0),
+      IdTipoPartReal: Number(item.IdTipoPartReal ?? item['ID Tipo Parte Real'] ?? item.IdTipoPart ?? 0),
+      NombreTipoParte: item.NombreTipoParte ?? item['Nombre Tipo Parte'] ?? '',
     };
   }
 
   // Query machine parts
-  handleSearch() {
-    const filtros: PartQueryFilter[] = [
-      this.buildFilter('Comp', this.companyCode)
-    ];
-
-    if (this.nombreParte) {
-      filtros.push(this.buildFilter('Nombre Parte', this.nombreParte.trim()));
-    }
-
-    if (this.CodiPart) {
-      filtros.push(this.buildFilter('Código Parte', this.CodiPart.trim()));
-    }
-
-    if (this.CodiMaqu) {
-      filtros.push(this.buildFilter('Código Máquina', this.CodiMaqu.trim()));
-    }
-
-    if (this.tipoParteNombre) {
-      const tipoParte = findTipoParteByName(this.tipoParteNombre);
-
-      if (tipoParte) {
-        filtros.push(this.buildFilter('Tipo Parte', tipoParte.id));
-      }
-    }
-
-    console.log('BODY QUERY:', filtros);
+  handleSearch(): void {
+    const filtros = [{
+      CodiCons: 'ListPart',
+      NombPara: 'Comp',
+      Valor: this.companyCode,
+      CodiComp: this.companyCode,
+      Token: this.token,
+      Report: '0'
+    }];
 
     this.partesService.search(filtros).subscribe({
       next: (res) => {
-        console.log('RESULTADO:', res);
-        this.results = Array.isArray(res) ? res : [];
+        this.results = Array.isArray(res) ? res.map(item => this.normalizeParte(item)) : [];
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('ERROR:', err);
+      error: () => {
+        this.results = [];
       }
     });
+  }
+
+  selectRow(item: PartResult): void {
+    this.select.emit(item);
   }
 }

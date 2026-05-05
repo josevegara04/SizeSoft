@@ -39,6 +39,7 @@ export class MaquinasEquiposLocalidadesComponent {
   tipoParteNombre: string = '';
   nombreParte: string = '';
   tiposParte = TIPOS_PARTE_TEMPORALES;
+  isEditing = false;
 
   private get companyCode(): string {
     return this.apiService.clsUser.CodiComp;
@@ -46,6 +47,23 @@ export class MaquinasEquiposLocalidadesComponent {
 
   private get token(): string {
     return this.apiService.lstrToken;
+  }
+
+  fillForm(item: any): void {
+    this.CodiPart = item.CodiPart ?? '';
+    this.CodiMaqu = item.CodiMaqu ?? '';
+    this.tipoParteNombre = item.NombreTipoParte ?? '';
+    this.nombreParte = item.NombreParte ?? '';
+    this.isEditing = true;
+    this.closeModal();
+  }
+
+  clearForm(): void {
+    this.CodiPart = '';
+    this.CodiMaqu = '';
+    this.tipoParteNombre = '';
+    this.nombreParte = '';
+    this.isEditing = false;
   }
 
   // Create or update machine part
@@ -103,6 +121,10 @@ export class MaquinasEquiposLocalidadesComponent {
           const parsed = JSON.parse(raw);
       
           this.sidebarService.addLog(parsed.message);
+
+          if (parsed.success && action === 2) {
+            this.clearForm();
+          }
       
           if (!parsed.success) {
             console.error('Error lógico:', parsed.message);

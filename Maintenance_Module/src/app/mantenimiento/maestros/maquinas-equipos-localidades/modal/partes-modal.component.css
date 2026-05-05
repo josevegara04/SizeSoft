@@ -77,91 +77,6 @@
   background: rgba(255, 255, 255, 0.22);
 }
 
-.modal-form {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(140px, 1fr));
-  gap: 14px;
-  padding: 18px 22px;
-  background: #f8fbfc;
-  border-bottom: 1px solid #e1ebef;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  color: #37474f;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.form-group input {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 38px;
-  margin: 0;
-  padding: 8px 11px;
-  background: #ffffff;
-  border: 1px solid #b8c7cd;
-  border-radius: 6px;
-  color: #263238;
-  font-size: 13px;
-  transition: border-color 0.18s, box-shadow 0.18s;
-}
-
-.form-group input:focus,
-.filters-row input:focus {
-  outline: none;
-  border-color: #1f6f8b;
-  box-shadow: 0 0 0 3px rgba(31, 111, 139, 0.13);
-}
-
-.modal-actions {
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.btn-primary,
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 38px;
-  margin: 0;
-  padding: 0 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.btn-primary {
-  background: #2f7d68;
-  color: #ffffff;
-  box-shadow: 0 5px 12px rgba(47, 125, 104, 0.2);
-}
-
-.btn-primary:hover {
-  background: #266957;
-}
-
-.btn-secondary {
-  background: #e8eef1;
-  color: #37474f;
-}
-
-.btn-secondary:hover {
-  background: #d7e2e6;
-}
-
 .results-panel {
   min-height: 0;
   padding: 18px 22px 22px;
@@ -186,7 +101,7 @@
 }
 
 .modal-table {
-  max-height: 360px;
+  max-height: 420px;
   overflow: auto;
   background: #ffffff;
   border: 1px solid #dde6ea;
@@ -221,6 +136,7 @@
 
 .modal-table tbody tr:hover {
   background: #f7fbfc;
+  cursor: pointer;
 }
 
 .modal-table tbody tr:nth-child(even) {
@@ -268,24 +184,11 @@
     align-items: flex-start;
     padding: 12px;
   }
-
-  .modal-form {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .modal-actions {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (max-width: 560px) {
-  .modal-form {
-    grid-template-columns: 1fr;
-  }
-
   .modal-header,
-  .results-header,
-  .modal-actions {
+  .results-header {
     align-items: stretch;
     flex-direction: column;
   }

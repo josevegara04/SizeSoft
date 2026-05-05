@@ -1,0 +1,125 @@
+<div class="parts-page">
+  <section class="page-hero">
+    <div>
+      <h2>Programación de Mantenimientos</h2>
+      <p>Cree, consulte, actualice y elimine la agenda de mantenimientos preventivos de la operación.</p>
+    </div>
+    <button type="button" class="btn-search hero-action" (click)="openModal()" title="Buscar programación">
+      <span class="button-icon">🔍</span>
+      Buscar programación
+    </button>
+  </section>
+
+  <section class="form-panel">
+    <div class="panel-header">
+      <div>
+        <span class="section-kicker">Ficha de programación</span>
+        <h3>Información general</h3>
+      </div>
+      @if (idProgMant !== null) {
+        <span class="status-pill">Editando #{{ idProgMant }}</span>
+      }
+    </div>
+
+    <div class="form-container">
+      <div class="form-group">
+        <label>ID Programación</label>
+        <input type="number" [ngModel]="idProgMant" name="idProgMant" placeholder="Se asigna al guardar" readonly />
+      </div>
+
+      <div class="form-group">
+        <label>ID Mantenimiento <span class="required">*</span></label>
+        <input type="number" [(ngModel)]="idMant" name="idMant" placeholder="Ej: 1" min="1" />
+      </div>
+
+      <div class="form-group">
+        <label>Fecha Inicio <span class="required">*</span></label>
+        <input type="date" [(ngModel)]="fechInic" name="fechInic" (ngModelChange)="onFechaInicioChange()" />
+      </div>
+
+      <div class="form-group">
+        <label>Frecuencia en días <span class="required">*</span></label>
+        <input type="number" [(ngModel)]="frecDias" name="frecDias" placeholder="Ej: 30" min="1" (ngModelChange)="onFrecuenciaChange()" />
+      </div>
+
+      <div class="form-group">
+        <label>Última Fecha</label>
+        <input type="date" [(ngModel)]="ultiFech" name="ultiFech" />
+      </div>
+
+      <div class="form-group">
+        <label>Próxima Fecha</label>
+        <input type="date" [ngModel]="proxFech" name="proxFech" readonly />
+      </div>
+
+      <div class="form-group">
+        <label>Estado</label>
+        <select [(ngModel)]="activo" name="activo">
+          <option [ngValue]="true">Activo</option>
+          <option [ngValue]="false">Inactivo</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="detail-panel">
+    <div class="panel-header">
+      <div>
+        <span class="section-kicker">Mantenimiento vinculado</span>
+        <h3>Resumen asociado</h3>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <span class="detail-label">Nombre</span>
+        <strong>{{ nombre || 'Sin información' }}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span class="detail-label">Código Máquina</span>
+        <strong>{{ codiMaqu || 'Sin información' }}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span class="detail-label">Tipo</span>
+        <strong>{{ tipoMant || 'Sin información' }}</strong>
+      </div>
+
+      <div class="detail-card">
+        <span class="detail-label">Ciclo base</span>
+        <strong>{{ tiempoDias ?? 'Sin información' }}</strong>
+      </div>
+
+      <div class="detail-card detail-card-wide">
+        <span class="detail-label">Descripción</span>
+        <p>{{ descripcion || 'Seleccione una programación para ver el detalle del mantenimiento.' }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="actions-panel">
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="clearForm()">Limpiar</button>
+
+      <button type="button" class="btn-primary" (click)="handleProgramacion(1)">
+        <span class="button-icon">💾</span>
+        {{ idProgMant === null ? 'Crear Programación' : 'Guardar Cambios' }}
+      </button>
+
+      @if (idProgMant !== null) {
+        <button type="button" class="btn-danger" (click)="handleProgramacion(2)">
+          <span class="button-icon">🗑️</span>
+          Eliminar
+        </button>
+      }
+    </div>
+  </section>
+</div>
+
+@if (showModal) {
+  <app-programacion-mantenimientos-modal
+    (close)="closeModal()"
+    (select)="onSelectProgramacion($event)">
+  </app-programacion-mantenimientos-modal>
+}

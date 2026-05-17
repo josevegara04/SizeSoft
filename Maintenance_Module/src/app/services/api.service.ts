@@ -267,6 +267,7 @@ export class ApiService {
                   const modalRef = this.modalService.open(MsgboxComponent, { size: 'sm', centered: true, windowClass: 'dark-modal' });
                   modalRef.componentInstance.title = 'Message Box';
                 }
+                const cookieKey = 'ERPCookie' + this.clsUser.CodiComp + this.clsUser.Id.toUpperCase();
                 this.lboolUserLogged = false;
                 //Limpiar las variables de identificación del usuario
                 this.clsUser.CodiComp = '';
@@ -274,8 +275,7 @@ export class ApiService {
                 this.clsUser.NombUsua = '';
                 this.clsUser.PassUsua = '';
                 this.lstrToken = '';
-                // 🔥 limpiar cookie también
-                const cookieKey = 'ERPCookie' + this.clsUser.CodiComp + this.clsUser.Id.toUpperCase();
+                // limpiar cookie también
                 this.cookieService.delete(cookieKey);
                 return;
               }

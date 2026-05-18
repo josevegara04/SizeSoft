@@ -1,0 +1,55 @@
+<div class="bitacora-page">
+  <section class="page-hero">
+    <div>
+      <span class="section-kicker">Transacciones</span>
+      <h2>Bitácora de Planta</h2>
+      <p>
+        Consulte el historial de acciones ejecutadas por los usuarios del módulo de mantenimiento.
+      </p>
+    </div>
+  </section>
+
+  <section class="table-panel">
+    <div class="panel-header">
+      <div>
+        <span class="section-kicker">Historial</span>
+        <h3>Registro de actividad</h3>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Módulo</th>
+            <th>Acción</th>
+            <th>Entidad</th>
+            <th>Referencia</th>
+            <th>Detalle</th>
+            <th>Resultado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (registro of registros; track registro.id) {
+            <tr>
+              <td>{{ registro.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ registro.usuario }}</td>
+              <td>{{ registro.modulo }}</td>
+              <td>{{ registro.accion }}</td>
+              <td>{{ registro.entidad }}</td>
+              <td>{{ registro.referencia }}</td>
+              <td>{{ registro.detalle }}</td>
+              <td>
+                <span class="status-pill" [class.error]="registro.resultado === 'Fallido'">
+                  {{ registro.resultado }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

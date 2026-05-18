@@ -60,6 +60,8 @@ export class MantenimientosComponent {
       TipoMant: this.TipoMant,
     
       CodiComp: this.apiService.clsUser.CodiComp,
+      CodiUsua: this.apiService.clsUser.Id,
+      NombUsua: this.apiService.clsUser.NombUsua,
       Entidad: 301,
 
       Token: this.apiService.lstrToken,

@@ -113,6 +113,8 @@ export class ProgramacionMantenimientosComponent {
       ProxFech: this.proxFech || null,
       Activo: this.activo,
       CodiComp: this.apiService.clsUser.CodiComp,
+      CodiUsua: this.apiService.clsUser.Id,
+      NombUsua: this.apiService.clsUser.NombUsua,
       Entidad: 308,
       Token: this.apiService.lstrToken,
       Accion: accion,

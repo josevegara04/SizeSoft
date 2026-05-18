@@ -148,6 +148,8 @@ export class OrdenesServicioComponent {
       Repuestos: this.repuestos.filter(r => r.idRepues && r.cantid),
       Operarios: this.operarios.filter(o => o !== null) as number[],
       CodiComp: this.apiService.clsUser.CodiComp,
+      CodiUsua: this.apiService.clsUser.Id,
+      NombUsua: this.apiService.clsUser.NombUsua,
       Token: this.apiService.lstrToken,
       Entidad: 303,
       Accion: action

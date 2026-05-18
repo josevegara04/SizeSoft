@@ -123,6 +123,8 @@ export class MaquinasEquiposLocalidadesComponent implements OnInit {
         IdTipoPart: this.tipoParteId ?? 0,
         CodiMaqu: this.CodiMaqu.trim(),
         CodiComp: this.companyCode,
+        CodiUsua: this.apiService.clsUser.Id,
+        NombUsua: this.apiService.clsUser.NombUsua,
         Entidad: 300,
         Token: this.token,
         Accion: action

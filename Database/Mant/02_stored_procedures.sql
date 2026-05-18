@@ -2653,130 +2653,134 @@ END CATCH
 END;
 
 
-CREATE PROCEDURE [Mant].[spSaveRepues]
+CREATE OR ALTER PROCEDURE [Mant].[spSaveRepues]
     @json NVARCHAR(MAX),
-    @CodiComp NVARCHAR(4),  
+    @CodiComp NVARCHAR(4),
     @CodiUsua NVARCHAR(15),
     @Accion SMALLINT,
     @Messag NVARCHAR(200) OUTPUT
 AS
 BEGIN
-    SET
-    NOCOUNT ON;
-    
+    SET NOCOUNT ON;
+
     DECLARE
         @idRepuesto INT,
-        @idTipoParte INT,
         @Cantid INT,
-        @Existe INT;
-BEGIN
-    TRY
-BEGIN
-        TRAN
-        -- Leer JSON
-        SELECT 
+        @CodiPart NVARCHAR(20),
+        @Existe INT,
+        @Success BIT = 1;
+
+    BEGIN TRY
+        BEGIN TRAN;
+
+        SELECT
             @idRepuesto = idRepuesto,
-            @idTipoParte = idTipoParte,
-            @Cantid = Cantid
-FROM
-    OPENJSON(@json)
+            @Cantid = Cantid,
+            @CodiPart = CodiPart
+        FROM OPENJSON(@json)
         WITH (
             idRepuesto INT,
-            idTipoParte INT,
-            Cantid INT
+            Cantid INT,
+            CodiPart NVARCHAR(20)
         );
--- Validar tipo de parte
-        IF NOT EXISTS (
-SELECT
-    1
-FROM
-    Mant.tblmanTipoPart
-WHERE
-    idTipoParte = @idTipoParte
-        )
-            THROW 51000,
-'El tipo de parte no existe',
-1;
--- Validar cantidad
-        IF (@Cantid IS NULL
-    OR @Cantid <= 0)
-            THROW 51000,
-'La cantidad debe ser mayor a cero',
-1;
--- Verificar existencia
+
         SELECT
-    @Existe = COUNT(*)
-FROM
-    Mant.tblmanRepues
-WHERE
-    idRepuesto = @idRepuesto;
--- ELIMINAR
-        IF (@Accion = 2)
+            @Existe = COUNT(*)
+        FROM Mant.tblmanRepues R
+        INNER JOIN Mant.tblmanPartMaqu P
+            ON P.CodiPart = R.CodiPart
+        WHERE R.idRepuesto = ISNULL(@idRepuesto, 0)
+          AND P.CodiComp = @CodiComp;
+
+        IF (@Accion IN (1, 3))
+        BEGIN
+            IF (@idRepuesto IS NULL OR @idRepuesto <= 0)
+                THROW 51000, 'Debe informar el id del repuesto', 1;
+
+            IF (NULLIF(LTRIM(RTRIM(@CodiPart)), '') IS NULL)
+                THROW 51000, 'Debe informar el codigo de la parte', 1;
+
+            IF (@Cantid IS NULL OR @Cantid <= 0)
+                THROW 51000, 'La cantidad debe ser mayor a cero', 1;
+
+            IF NOT EXISTS (
+                SELECT 1
+                FROM Mant.tblmanPartMaqu
+                WHERE CodiPart = @CodiPart
+                  AND CodiComp = @CodiComp
+            )
+                THROW 51000, 'La parte no existe en esta compañía', 1;
+        END
+
+        IF (@Accion = 1)
+        BEGIN
+            IF EXISTS (
+                SELECT 1
+                FROM Mant.tblmanRepues
+                WHERE idRepuesto = @idRepuesto
+            )
+                THROW 51000, 'El repuesto ya existe', 1;
+
+            INSERT INTO Mant.tblmanRepues (
+                idRepuesto,
+                Cantid,
+                CodiPart
+            )
+            VALUES (
+                @idRepuesto,
+                @Cantid,
+                @CodiPart
+            );
+
+            SET @Messag = '{"success": true, "message": "Repuesto creado"}';
+        END
+        ELSE IF (@Accion = 2)
         BEGIN
             IF (@Existe = 0)
-                SET
-@Messag = 'El repuesto no existe'
-ELSE
-            BEGIN
-                DELETE
-FROM
-    Mant.tblmanRepues
-WHERE
-    idRepuesto = @idRepuesto;
+                THROW 51000, 'El repuesto no existe en esta compañía', 1;
 
-SET
-@Messag = 'Repuesto eliminado';
-END
-END
--- INSERT / UPDATE
-ELSE IF (@Accion = 1)
-BEGIN
-            IF (@Existe > 0)
-BEGIN
--- UPDATE
-                UPDATE
-    Mant.tblmanRepues
-SET 
-                    idTipoParte = @idTipoParte,
-                    Cantid = @Cantid
-WHERE
-    idRepuesto = @idRepuesto;
+            DELETE R
+            FROM Mant.tblmanRepues R
+            INNER JOIN Mant.tblmanPartMaqu P
+                ON P.CodiPart = R.CodiPart
+            WHERE R.idRepuesto = @idRepuesto
+              AND P.CodiComp = @CodiComp;
 
-SET
-@Messag = 'Repuesto actualizado';
-END
-ELSE
-BEGIN
--- INSERT
-                INSERT
-    INTO
-    Mant.tblmanRepues (
-                    idRepuesto,
-                    idTipoParte,
-                    Cantid
-                )
-VALUES (
-                    @idRepuesto,
-                    @idTipoParte,
-                    @Cantid
-                );
+            SET @Messag = '{"success": true, "message": "Repuesto eliminado"}';
+        END
+        ELSE IF (@Accion = 3)
+        BEGIN
+            IF (@Existe = 0)
+                THROW 51000, 'El repuesto no existe en esta compañía', 1;
 
-SET
-@Messag = 'Repuesto creado';
-END
-END
-
-        COMMIT
-END TRY
-BEGIN
-CATCH
-        ROLLBACK
-
-        IF (ERROR_NUMBER() = 547)
+            UPDATE R
             SET
-@Messag = 'No se puede eliminar el repuesto porque tiene relaciones'
-ELSE
-            SET
-@Messag = ERROR_MESSAGE()
-END CATCH
+                R.Cantid = @Cantid,
+                R.CodiPart = @CodiPart
+            FROM Mant.tblmanRepues R
+            INNER JOIN Mant.tblmanPartMaqu P
+                ON P.CodiPart = R.CodiPart
+            WHERE R.idRepuesto = @idRepuesto
+              AND P.CodiComp = @CodiComp;
+
+            SET @Messag = '{"success": true, "message": "Repuesto actualizado"}';
+        END
+        ELSE
+        BEGIN
+            THROW 51000, 'Accion no valida', 1;
+        END
+
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK;
+
+        SET @Success = 0;
+        SET @Messag = '{"success": false, "message": "' + REPLACE(ERROR_MESSAGE(), '"', '\"') + '"}';
+    END CATCH
+
+    SELECT
+        @Success AS success,
+        @Messag AS message;
 END;

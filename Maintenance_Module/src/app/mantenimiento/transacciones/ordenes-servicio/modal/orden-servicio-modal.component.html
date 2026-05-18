@@ -14,7 +14,12 @@
           <span class="modal-kicker">Resultados</span>
           <h3>Listado de órdenes</h3>
         </div>
-        <span class="count-pill">{{ filteredResults.length }} registros</span>
+        <div class="results-actions">
+          <span class="count-pill">{{ filteredResults.length }} registros</span>
+          <button type="button" class="btn-export" (click)="exportOrdersToExcel()" [disabled]="isExporting">
+            {{ isExporting ? 'Exportando...' : 'Exportar Excel' }}
+          </button>
+        </div>
       </div>
 
       <div class="modal-table">

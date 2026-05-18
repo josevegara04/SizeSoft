@@ -18,7 +18,6 @@ interface Repuesto {
   imports: [FormsModule, OrdenServicioModalComponent],
 })
 export class OrdenesServicioComponent {
-
   constructor(
     private ordenService: OrdenServicioService,
     private apiService: ApiService,

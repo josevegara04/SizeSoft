@@ -245,6 +245,19 @@
   transform: translateY(-1px);
 }
 
+.btn-primary:disabled,
+.btn-danger:disabled,
+.btn-search:disabled,
+.btn-secondary:disabled,
+.btn-success:disabled,
+.btn-warning:disabled,
+.btn-add:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .btn-danger {
   background: #c0392b;
   color: #ffffff;
@@ -351,4 +364,5 @@
   .operario-item {
     grid-template-columns: 1fr;
   }
+
 }

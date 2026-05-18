@@ -52,6 +52,10 @@
 }
 
 .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 16px 20px;
   border-bottom: 1px solid #e8eef1;
   background: #fbfdfe;
@@ -61,6 +65,24 @@
   font-size: 17px;
 }
 
+.btn-refresh {
+  min-height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 6px;
+  background: #1f6f8b;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.16s, transform 0.16s;
+}
+
+.btn-refresh:hover {
+  background: #17576d;
+  transform: translateY(-1px);
+}
+
 .table-wrapper {
   overflow-x: auto;
 }
@@ -68,7 +90,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 980px;
+  min-width: 920px;
 }
 
 thead th {
@@ -94,19 +116,13 @@ tbody tr:hover {
   background: #fbfdfe;
 }
 
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: #e8f5e9;
-  color: #2e7d32;
+.table-state {
+  color: #607d8b;
   font-size: 12px;
-  font-weight: 700;
+  text-align: center;
 }
 
-.status-pill.error {
-  background: #fdecea;
+.table-state-error {
   color: #c0392b;
+  font-weight: 700;
 }

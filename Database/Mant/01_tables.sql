@@ -1,6 +1,21 @@
 -- DROP SCHEMA Mant;
 
 CREATE SCHEMA Mant;
+-- ERPPruebas.Mant.tblmanBitaco definition
+-- Drop table
+-- DROP TABLE ERPPruebas.Mant.tblmanBitaco;
+
+CREATE TABLE ERPPruebas.Mant.tblmanBitaco (
+	IdBitaco int IDENTITY(1, 1) NOT NULL,
+	FechRegi datetime DEFAULT getdate() NOT NULL,
+	CodiComp nvarchar(4) COLLATE Modern_Spanish_CI_AS NOT NULL,
+	CodiUsua nvarchar(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
+	NombUsua nvarchar(150) COLLATE Modern_Spanish_CI_AS NOT NULL,
+	Modulo varchar(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
+	Accion varchar(20) COLLATE Modern_Spanish_CI_AS NOT NULL,
+	Mensaj varchar(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
+	CONSTRAINT PK_tblmanBitaco PRIMARY KEY (IdBitaco)
+);
 -- ERPPruebas.Mant.tblmanCritic definition
 -- Drop table
 -- DROP TABLE ERPPruebas.Mant.tblmanCritic;

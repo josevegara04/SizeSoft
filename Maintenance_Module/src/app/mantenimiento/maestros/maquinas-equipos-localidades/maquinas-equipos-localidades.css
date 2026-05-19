@@ -142,7 +142,8 @@
 
 .btn-primary,
 .btn-danger,
-.btn-search {
+.btn-search,
+.btn-inline-search {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -189,6 +190,70 @@
 .btn-search:hover {
   background: #175a72;
   transform: translateY(-1px);
+}
+
+.btn-inline-search {
+  align-self: flex-start;
+  min-height: 32px;
+  padding: 0 12px;
+  background: #edf3f5;
+  color: #1f6f8b;
+  font-size: 12px;
+}
+
+.btn-inline-search:hover {
+  background: #dbe8ed;
+}
+
+.selector-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 12px;
+  background: #f8fbfc;
+  border: 1px solid #dde8ec;
+  border-radius: 8px;
+}
+
+.selector-results {
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid #dde6ea;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.selector-item {
+  display: flex;
+  width: 100%;
+  gap: 12px;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid #edf1f3;
+  background: #ffffff;
+  color: #263238;
+  text-align: left;
+  cursor: pointer;
+}
+
+.selector-item:last-child {
+  border-bottom: none;
+}
+
+.selector-item:hover {
+  background: #f4fbfc;
+}
+
+.selector-item strong {
+  color: #155a72;
+}
+
+.selector-empty {
+  margin: 0;
+  padding: 16px 12px;
+  color: #78909c;
+  font-style: italic;
 }
 
 .button-icon {

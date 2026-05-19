@@ -85,6 +85,8 @@ export class OperariosComponent {
     const body: any = {
       Accion:   accion,
       CodiComp: this.apiService.clsUser.CodiComp,
+      CodiUsua: this.apiService.clsUser.Id,
+      NombUsua: this.apiService.clsUser.NombUsua,
       Token:    this.apiService.lstrToken,
       Entidad:  304,
     };

@@ -1,13 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { OrdenServicioService } from './orden-servicio.service';
 import { ApiService } from '../../../services/api.service';
 import { SidebarService } from '../../../side-bar/sidebar.service';
 import { OrdenServicioModalComponent } from './modal/orden-servicio-modal.component';
+import { OrdenServicioPrefillService, ProgramacionOrdenPrefill } from './orden-servicio-prefill.service';
+import { RepuestosService } from '../../maestros/repuestos/repuestos.service';
+import { OperariosService } from '../../maestros/operarios/operarios.service';
 
-interface Repuesto {
+interface RepuestoRow {
   idRepues: number | null;
   cantid: number | null;
+  nombreParte: string;
+  showSelector: boolean;
+  searchTerm: string;
+}
+
+interface OperarioRow {
+  id: number | null;
+  nombre: string;
+  showSelector: boolean;
+  searchTerm: string;
 }
 
 @Component({
@@ -17,29 +30,46 @@ interface Repuesto {
   styleUrls: ['./orden-servicio.component.css'],
   imports: [FormsModule, OrdenServicioModalComponent],
 })
-export class OrdenesServicioComponent {
+export class OrdenesServicioComponent implements OnInit {
   constructor(
     private ordenService: OrdenServicioService,
     private apiService: ApiService,
-    private sidebarService: SidebarService
+    private sidebarService: SidebarService,
+    private ordenServicioPrefillService: OrdenServicioPrefillService,
+    private repuestosService: RepuestosService,
+    private operariosService: OperariosService,
   ) {}
 
-  // Campos del formulario
-  codiOrdMaqu: string = '';
-  codiMaqu: string = '';
-  fechaInicio: string = '';
-  fechaFin: string = '';
-  tipoMant: string = '';
+  codiOrdMaqu = '';
+  codiMaqu = '';
+  machineSearchTerm = '';
+  showMachineSelector = false;
+  fechaInicio = '';
+  fechaFin = '';
+  tipoMant = '';
   idMantenimiento: number | null = null;
   idEsta: number | null = null;
-  nombreEstado: string = '';
+  nombreEstado = '';
+  programacionOrigenId: number | null = null;
+  programacionOrigenNombre = '';
 
-  // Listas dinámicas
-  repuestos: Repuesto[] = [{ idRepues: null, cantid: null }];
-  operarios: (number | null)[] = [null];
+  repuestos: RepuestoRow[] = [this.createEmptyRepuesto()];
+  operarios: OperarioRow[] = [this.createEmptyOperario()];
 
-  // Modal
-  showModal: boolean = false;
+  machineResults: any[] = [];
+  repuestoResults: any[] = [];
+  operarioResults: any[] = [];
+
+  showModal = false;
+
+  ngOnInit(): void {
+    const prefill = this.ordenServicioPrefillService.consumePending();
+    if (!prefill) {
+      return;
+    }
+
+    this.applyProgramacionPrefill(prefill);
+  }
 
   openModal(): void {
     this.showModal = true;
@@ -61,25 +91,25 @@ export class OrdenesServicioComponent {
 
     try {
       const reps = JSON.parse(item.Repuestos ?? '[]');
-      this.repuestos = reps.length > 0 ? reps : [{ idRepues: null, cantid: null }];
+      this.repuestos = Array.isArray(reps) && reps.length > 0
+        ? reps.map((rep: any) => ({
+            idRepues: this.toNumber(rep.idRepues),
+            cantid: this.toNumber(rep.cantid),
+            nombreParte: '',
+            showSelector: false,
+            searchTerm: '',
+          }))
+        : [this.createEmptyRepuesto()];
     } catch {
-      this.repuestos = [{ idRepues: null, cantid: null }];
+      this.repuestos = [this.createEmptyRepuesto()];
     }
 
-    // Los operarios no se retornan en la consulta; el usuario los debe ingresar al editar
-    this.operarios = [null];
-
+    this.operarios = [this.createEmptyOperario()];
     this.closeModal();
   }
 
-  private toDatetimeLocal(dateStr: string): string {
-    const d = new Date(dateStr);
-    return d.toISOString().slice(0, 16);
-  }
-
-  // Gestión de repuestos
   addRepuesto(): void {
-    this.repuestos.push({ idRepues: null, cantid: null });
+    this.repuestos.push(this.createEmptyRepuesto());
   }
 
   removeRepuesto(index: number): void {
@@ -88,9 +118,8 @@ export class OrdenesServicioComponent {
     }
   }
 
-  // Gestión de operarios
   addOperario(): void {
-    this.operarios.push(null);
+    this.operarios.push(this.createEmptyOperario());
   }
 
   removeOperario(index: number): void {
@@ -102,14 +131,95 @@ export class OrdenesServicioComponent {
   clearForm(): void {
     this.codiOrdMaqu = '';
     this.codiMaqu = '';
+    this.machineSearchTerm = '';
+    this.showMachineSelector = false;
     this.fechaInicio = '';
     this.fechaFin = '';
     this.tipoMant = '';
     this.idMantenimiento = null;
     this.idEsta = null;
     this.nombreEstado = '';
-    this.repuestos = [{ idRepues: null, cantid: null }];
-    this.operarios = [null];
+    this.programacionOrigenId = null;
+    this.programacionOrigenNombre = '';
+    this.repuestos = [this.createEmptyRepuesto()];
+    this.operarios = [this.createEmptyOperario()];
+  }
+
+  toggleMachineSelector(): void {
+    this.showMachineSelector = !this.showMachineSelector;
+    if (this.showMachineSelector && this.machineResults.length === 0) {
+      this.loadMachines();
+    }
+  }
+
+  get filteredMachineResults(): any[] {
+    const term = this.machineSearchTerm.trim().toLowerCase();
+    if (!term) {
+      return this.machineResults;
+    }
+
+    return this.machineResults.filter(item =>
+      item.CodiMaqu?.toLowerCase().includes(term)
+    );
+  }
+
+  selectMachine(item: any): void {
+    this.codiMaqu = item.CodiMaqu ?? '';
+    this.machineSearchTerm = '';
+    this.showMachineSelector = false;
+  }
+
+  toggleRepuestoSelector(index: number): void {
+    this.repuestos[index].showSelector = !this.repuestos[index].showSelector;
+    if (this.repuestos[index].showSelector && this.repuestoResults.length === 0) {
+      this.loadRepuestos();
+    }
+  }
+
+  getFilteredRepuestoResults(index: number): any[] {
+    const term = this.repuestos[index].searchTerm.trim().toLowerCase();
+    if (!term) {
+      return this.repuestoResults;
+    }
+
+    return this.repuestoResults.filter(item =>
+      item.idRepuesto?.toString().includes(term) ||
+      item.NombreParte?.toLowerCase().includes(term)
+    );
+  }
+
+  selectRepuesto(index: number, item: any): void {
+    this.repuestos[index].idRepues = this.toNumber(item.idRepuesto ?? item.IdRepuesto);
+    this.repuestos[index].nombreParte = item.NombreParte ?? '';
+    this.repuestos[index].searchTerm = '';
+    this.repuestos[index].showSelector = false;
+  }
+
+  toggleOperarioSelector(index: number): void {
+    this.operarios[index].showSelector = !this.operarios[index].showSelector;
+    if (this.operarios[index].showSelector && this.operarioResults.length === 0) {
+      this.loadOperarios();
+    }
+  }
+
+  getFilteredOperarioResults(index: number): any[] {
+    const term = this.operarios[index].searchTerm.trim().toLowerCase();
+    if (!term) {
+      return this.operarioResults;
+    }
+
+    return this.operarioResults.filter(item =>
+      item.IdOper?.toString().includes(term) ||
+      item.Nombre?.toLowerCase().includes(term) ||
+      item.Apellid?.toLowerCase().includes(term)
+    );
+  }
+
+  selectOperario(index: number, item: any): void {
+    this.operarios[index].id = this.toNumber(item.IdOper);
+    this.operarios[index].nombre = [item.Nombre ?? '', item.Apellid ?? ''].join(' ').trim();
+    this.operarios[index].searchTerm = '';
+    this.operarios[index].showSelector = false;
   }
 
   handleOrder(action: number): void {
@@ -118,7 +228,6 @@ export class OrdenesServicioComponent {
       return;
     }
 
-    // Validación de campos completos para crear y editar
     if (action === 1 || action === 3) {
       if (!this.codiMaqu || !this.fechaInicio || !this.tipoMant || !this.idMantenimiento) {
         this.sidebarService.addLog('Complete todos los campos obligatorios');
@@ -131,7 +240,7 @@ export class OrdenesServicioComponent {
         return;
       }
 
-      const operariosValidos = this.operarios.every(o => o !== null && o > 0);
+      const operariosValidos = this.operarios.every(o => o.id !== null && o.id > 0);
       if (!operariosValidos) {
         this.sidebarService.addLog('Complete correctamente los operarios (ID > 0)');
         return;
@@ -145,12 +254,18 @@ export class OrdenesServicioComponent {
       TipoMant: this.tipoMant,
       idMantenimiento: this.idMantenimiento,
       fechaFin: this.fechaFin ? new Date(this.fechaFin).toISOString() : null,
-      Repuestos: this.repuestos.filter(r => r.idRepues && r.cantid),
-      Operarios: this.operarios.filter(o => o !== null) as number[],
+      Repuestos: this.repuestos
+        .filter(r => r.idRepues && r.cantid)
+        .map(r => ({ idRepues: r.idRepues, cantid: r.cantid })),
+      Operarios: this.operarios
+        .filter(o => o.id !== null)
+        .map(o => o.id as number),
       CodiComp: this.apiService.clsUser.CodiComp,
+      CodiUsua: this.apiService.clsUser.Id,
+      NombUsua: this.apiService.clsUser.NombUsua,
       Token: this.apiService.lstrToken,
       Entidad: 303,
-      Accion: action
+      Accion: action,
     };
 
     this.ordenService.saveOrden(body).subscribe({
@@ -163,7 +278,6 @@ export class OrdenesServicioComponent {
         } catch {}
         this.sidebarService.addLog(message);
 
-        // Actualizar estado local si la operación fue exitosa
         if (action === 2) this.clearForm();
         if (action === 4) { this.idEsta = 3; this.nombreEstado = 'Pausada'; }
         if (action === 5) { this.idEsta = 5; this.nombreEstado = 'Cancelada'; }
@@ -174,5 +288,118 @@ export class OrdenesServicioComponent {
         this.sidebarService.addLog('Error al procesar la orden');
       }
     });
+  }
+
+  private applyProgramacionPrefill(prefill: ProgramacionOrdenPrefill): void {
+    this.clearForm();
+
+    this.codiMaqu = prefill.codiMaqu ?? '';
+    this.tipoMant = prefill.tipoMant ?? '';
+    this.idMantenimiento = prefill.idMant ?? null;
+    this.fechaInicio = this.toDatetimeLocalFromDate(prefill.proxFech || prefill.fechInic);
+    this.programacionOrigenId = prefill.idProgMant ?? null;
+    this.programacionOrigenNombre = prefill.nombre ?? '';
+
+    this.sidebarService.addLog('Se cargó la información base de la programación seleccionada');
+  }
+
+  private loadRepuestos(): void {
+    const body = [{
+      CodiCons: 'RepuMant',
+      NombPara: 'Codigo Compañia',
+      Valor: this.apiService.clsUser.CodiComp,
+      CodiComp: this.apiService.clsUser.CodiComp,
+      Token: this.apiService.lstrToken,
+      Report: '0',
+    }];
+
+    this.repuestosService.search(body).subscribe({
+      next: (res) => {
+        this.repuestoResults = Array.isArray(res) ? res : [];
+      },
+      error: () => {
+        this.repuestoResults = [];
+        this.sidebarService.addLog('No fue posible cargar los repuestos');
+      },
+    });
+  }
+
+  private loadMachines(): void {
+    const body = [{
+      CodiCons: 'MaquMant',
+      NombPara: 'Codigo Compañia',
+      Valor: this.apiService.clsUser.CodiComp,
+      CodiComp: this.apiService.clsUser.CodiComp,
+      Token: this.apiService.lstrToken,
+      Report: '0',
+    }];
+
+    this.ordenService.search(body).subscribe({
+      next: (res) => {
+        this.machineResults = Array.isArray(res) ? res : [];
+      },
+      error: () => {
+        this.machineResults = [];
+        this.sidebarService.addLog('No fue posible cargar las máquinas');
+      },
+    });
+  }
+
+  private loadOperarios(): void {
+    const body = [{
+      CodiCons: 'Operar',
+      NombPara: 'Compañía',
+      Valor: this.apiService.clsUser.CodiComp,
+      CodiComp: this.apiService.clsUser.CodiComp,
+      Token: this.apiService.lstrToken,
+      Report: '0',
+    }];
+
+    this.operariosService.search(body).subscribe({
+      next: (res) => {
+        this.operarioResults = Array.isArray(res) ? res : [];
+      },
+      error: () => {
+        this.operarioResults = [];
+        this.sidebarService.addLog('No fue posible cargar los operarios');
+      },
+    });
+  }
+
+  private createEmptyRepuesto(): RepuestoRow {
+    return {
+      idRepues: null,
+      cantid: null,
+      nombreParte: '',
+      showSelector: false,
+      searchTerm: '',
+    };
+  }
+
+  private createEmptyOperario(): OperarioRow {
+    return {
+      id: null,
+      nombre: '',
+      showSelector: false,
+      searchTerm: '',
+    };
+  }
+
+  private toDatetimeLocal(dateStr: string): string {
+    const d = new Date(dateStr);
+    return d.toISOString().slice(0, 16);
+  }
+
+  private toDatetimeLocalFromDate(dateStr: string): string {
+    if (!dateStr) {
+      return '';
+    }
+
+    return `${dateStr.slice(0, 10)}T00:00`;
+  }
+
+  private toNumber(value: any): number | null {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 }

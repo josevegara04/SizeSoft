@@ -18,9 +18,14 @@ import { CommonModule } from '@angular/common';
     }
 
     @Output() close = new EventEmitter<void>();
+    @Output() select = new EventEmitter<any>();
 
     cerrarModal() {
     this.close.emit();
+    }
+
+    selectRow(item: any): void {
+      this.select.emit(item);
     }
 
     constructor(

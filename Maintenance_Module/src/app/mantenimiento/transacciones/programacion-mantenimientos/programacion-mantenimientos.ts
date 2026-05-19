@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import { SidebarService } from '../../../side-bar/sidebar.service';
+import { OrdenServicioPrefillService } from '../ordenes-servicio/orden-servicio-prefill.service';
 import { ProgramacionMantenimientosModalComponent } from './modal/programacion-mantenimientos-modal.component';
 import { ProgramacionMantenimientosService } from './programacion-mantenimientos.service';
 
@@ -18,6 +20,8 @@ export class ProgramacionMantenimientosComponent {
     private programacionService: ProgramacionMantenimientosService,
     private apiService: ApiService,
     private sidebarService: SidebarService,
+    private ordenServicioPrefillService: OrdenServicioPrefillService,
+    private router: Router,
   ) {}
 
   showModal = false;
@@ -86,6 +90,26 @@ export class ProgramacionMantenimientosComponent {
     this.tipoMant = '';
   }
 
+  goToOrdenServicio(): void {
+    if (this.idProgMant === null || this.idMant === null) {
+      this.sidebarService.addLog('Seleccione una programación válida antes de crear la orden');
+      return;
+    }
+
+    this.ordenServicioPrefillService.setPending({
+      idProgMant: this.idProgMant,
+      idMant: this.idMant,
+      fechInic: this.fechInic,
+      proxFech: this.proxFech,
+      codiMaqu: this.codiMaqu,
+      tipoMant: this.tipoMant,
+      nombre: this.nombre,
+      descripcion: this.descripcion,
+    });
+
+    this.router.navigate(['/mantenimiento/transacciones/ordenes-servicio']);
+  }
+
   handleProgramacion(accion: number): void {
     if (accion === 2 && this.idProgMant === null) {
       this.sidebarService.addLog('Seleccione una programación para eliminar');
@@ -113,6 +137,8 @@ export class ProgramacionMantenimientosComponent {
       ProxFech: this.proxFech || null,
       Activo: this.activo,
       CodiComp: this.apiService.clsUser.CodiComp,
+      CodiUsua: this.apiService.clsUser.Id,
+      NombUsua: this.apiService.clsUser.NombUsua,
       Entidad: 308,
       Token: this.apiService.lstrToken,
       Accion: accion,

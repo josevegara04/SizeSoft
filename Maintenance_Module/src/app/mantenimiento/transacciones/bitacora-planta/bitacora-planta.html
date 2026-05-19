@@ -1,0 +1,56 @@
+<div class="bitacora-page">
+  <section class="page-hero">
+    <div>
+      <span class="section-kicker">Transacciones</span>
+      <h2>Bitácora de Planta</h2>
+      <p>
+        Consulte el historial de acciones ejecutadas por los usuarios del módulo de mantenimiento.
+      </p>
+    </div>
+  </section>
+
+  <section class="table-panel">
+    <div class="panel-header">
+      <div>
+        <span class="section-kicker">Historial</span>
+        <h3>Registro de actividad</h3>
+      </div>
+      <button type="button" class="btn-refresh" (click)="loadBitacora()">
+        Actualizar
+      </button>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Código Usuario</th>
+            <th>Nombre Usuario</th>
+            <th>Módulo</th>
+            <th>Acción</th>
+            <th>Mensaje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="loading">
+            <td colspan="6" class="table-state">Cargando bitácora...</td>
+          </tr>
+
+          <tr *ngIf="!loading && errorMessage">
+            <td colspan="6" class="table-state table-state-error">{{ errorMessage }}</td>
+          </tr>
+
+          <tr *ngFor="let registro of registros; trackBy: trackById">
+            <td>{{ registro.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ registro.codiUsua }}</td>
+            <td>{{ registro.nombUsua }}</td>
+            <td>{{ registro.modulo }}</td>
+            <td>{{ registro.accion }}</td>
+            <td>{{ registro.mensaj }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

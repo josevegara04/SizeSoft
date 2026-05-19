@@ -87,6 +87,8 @@ export class CausasMantenimientoComponent {
       TipoMant: this.TipoMant,
       Activo: Number(this.Activo),
       CodiComp: this.apiService.clsUser.CodiComp,
+      CodiUsua: this.apiService.clsUser.Id,
+      NombUsua: this.apiService.clsUser.NombUsua,
       Entidad: 306,
       Token: this.apiService.lstrToken,
       Accion: action,

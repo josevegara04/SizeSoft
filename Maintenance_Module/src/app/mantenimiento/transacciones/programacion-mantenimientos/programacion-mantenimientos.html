@@ -108,6 +108,11 @@
       </button>
 
       @if (idProgMant !== null) {
+        <button type="button" class="btn-success" (click)="goToOrdenServicio()">
+          <span class="button-icon">🧾</span>
+          Crear orden de servicio
+        </button>
+
         <button type="button" class="btn-danger" (click)="handleProgramacion(2)">
           <span class="button-icon">🗑️</span>
           Eliminar

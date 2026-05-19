@@ -1,0 +1,54 @@
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <span class="modal-kicker">Consulta de maestros</span>
+        <h2>Búsqueda de Repuestos</h2>
+      </div>
+      <button type="button" class="icon-close" (click)="cerrarModal()" title="Cerrar">✕</button>
+    </div>
+
+    <section class="results-panel">
+      <div class="results-header">
+        <div>
+          <span class="modal-kicker">Resultados</span>
+          <h3>Listado de repuestos</h3>
+        </div>
+        <span class="count-pill">{{ filteredResults.length }} registros</span>
+      </div>
+
+      <div class="modal-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID Repuesto</th>
+              <th>Código Parte</th>
+              <th>Nombre Parte</th>
+              <th>Cantidad</th>
+            </tr>
+            <tr class="filters-row">
+              <th><input type="text" [(ngModel)]="filterIdRepuesto" placeholder="Filtrar" /></th>
+              <th><input type="text" [(ngModel)]="filterCodiPart" placeholder="Filtrar" /></th>
+              <th><input type="text" [(ngModel)]="filterNombreParte" placeholder="Filtrar" /></th>
+              <th><input type="text" [(ngModel)]="filterCantid" placeholder="Filtrar" /></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filteredResults; track item.idRepuesto) {
+              <tr (click)="selectRow(item)">
+                <td><code>{{ item.idRepuesto }}</code></td>
+                <td>{{ item.CodiPart }}</td>
+                <td>{{ item.NombreParte || '—' }}</td>
+                <td>{{ item.Cantid }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="no-data">No hay repuestos registrados.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>

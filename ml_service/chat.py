@@ -15,7 +15,7 @@ collection = ingest()
 def get_relevant_context(question: str) -> str:
     results = collection.query(
         query_texts=[question],
-        n_results=2
+        n_results=4
     )
     chunks = results["documents"][0] if results["documents"] else []
     return "\n\n".join(chunks)

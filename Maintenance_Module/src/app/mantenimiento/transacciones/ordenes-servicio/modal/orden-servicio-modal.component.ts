@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { OrdenServicioService } from '../orden-servicio.service';
 import { ApiService } from '../../../../services/api.service';
 import { SidebarService } from '../../../../side-bar/sidebar.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-orden-servicio-modal',
@@ -25,6 +26,7 @@ export class OrdenServicioModalComponent implements OnInit {
   filterCodiMaqu: string = '';
   filterTipoMant: string = '';
   filterEstado: string = '';
+  private sheetNameRegistry = new Set<string>();
 
   constructor(
     private ordenService: OrdenServicioService,
@@ -67,7 +69,7 @@ export class OrdenServicioModalComponent implements OnInit {
     });
   }
 
-  exportOrdersToExcel(): void {
+  async exportOrdersToExcel(): Promise<void> {
     if (this.isExporting) {
       return;
     }
@@ -80,7 +82,10 @@ export class OrdenServicioModalComponent implements OnInit {
     this.isExporting = true;
 
     try {
-      const rows = this.filteredResults.map((item) => ({
+      const maintenanceDetails = await this.loadMaintenanceDetails();
+      this.sheetNameRegistry.clear();
+
+      const summaryRows = this.filteredResults.map((item) => ({
         'Código Orden': item.CodiOrdMaqu ?? '',
         'Código Máquina': item.CodiMaqu ?? '',
         'Fecha Inicio': this.formatExcelDate(item.Fecha_inicio),
@@ -89,11 +94,12 @@ export class OrdenServicioModalComponent implements OnInit {
         'Tipo Mantenimiento': item.TipoMant ?? '',
         'ID Mantenimiento': item.idMantenimiento ?? '',
         'Estado': item.NombreEstado ?? '',
-        'ID Estado': item.IdEsta ?? '',
+        'Actividades': this.formatActivitiesForExport(maintenanceDetails.get(Number(item.idMantenimiento))?.Actividades),
+        'Causas': this.formatCausesForExport(maintenanceDetails.get(Number(item.idMantenimiento))?.Causas),
         'Repuestos': this.formatRepuestosForExport(item.Repuestos),
       }));
 
-      const xmlContent = this.buildExcelXml(rows);
+      const xmlContent = this.buildWorkbookXml(summaryRows, maintenanceDetails);
       const blob = new Blob([`\ufeff${xmlContent}`], { type: this.excelMimeType });
       const companyCode = this.apiService.clsUser.CodiComp || 'empresa';
       const fileName = `ordenes-servicio-${companyCode}-${this.getExportDateStamp()}.xls`;
@@ -153,21 +159,93 @@ export class OrdenServicioModalComponent implements OnInit {
     }
   }
 
-  private buildExcelXml(rows: Record<string, unknown>[]): string {
-    const headers = Object.keys(rows[0]);
-    const headerCells = headers
-      .map((header) => `<Cell ss:StyleID="header"><Data ss:Type="String">${this.escapeXml(header)}</Data></Cell>`)
-      .join('');
+  private formatActivitiesForExport(raw: unknown): string {
+    const actividades = this.parseJsonArray(raw);
+    if (actividades.length === 0) {
+      return '';
+    }
 
-    const dataRows = rows
-      .map((row) => {
-        const cells = headers
-          .map((header) => `<Cell><Data ss:Type="String">${this.escapeXml(String(row[header] ?? ''))}</Data></Cell>`)
-          .join('');
+    return actividades
+      .map((item) => item.NombActi ?? item.NombreActividad ?? item.CodiActi ?? '')
+      .filter((item) => !!item)
+      .join(', ');
+  }
 
-        return `<Row>${cells}</Row>`;
-      })
-      .join('');
+  private formatCausesForExport(raw: unknown): string {
+    const causas = this.parseJsonArray(raw);
+    if (causas.length === 0) {
+      return '';
+    }
+
+    return causas
+      .map((item) => item.NombCaus ?? item.NombreCausa ?? item.CodiCaus ?? '')
+      .filter((item) => !!item)
+      .join(', ');
+  }
+
+  private parseJsonArray(raw: unknown): any[] {
+    if (Array.isArray(raw)) {
+      return raw;
+    }
+
+    if (!raw || typeof raw !== 'string') {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private async loadMaintenanceDetails(): Promise<Map<number, any>> {
+    const body = [{
+      CodiCons: 'MantDeta',
+      NombPara: 'Codigo Compañia',
+      Valor: this.apiService.clsUser.CodiComp,
+      CodiComp: this.apiService.clsUser.CodiComp,
+      Token: this.apiService.lstrToken,
+      Report: '0',
+    }];
+
+    const response = await firstValueFrom(this.ordenService.search(body));
+    const rows = Array.isArray(response) ? response : [];
+    const detailMap = new Map<number, any>();
+
+    rows.forEach((item: any) => {
+      const id = Number(item.idMantenimiento ?? item.IdMantenimiento ?? 0);
+      if (id > 0) {
+        detailMap.set(id, item);
+      }
+    });
+
+    return detailMap;
+  }
+
+  private buildWorkbookXml(summaryRows: Record<string, unknown>[], maintenanceDetails: Map<number, any>): string {
+    const orderSheetNames = new Map<string, string>();
+    const indexRows = this.filteredResults.map((item) => {
+      const orderCode = String(item.CodiOrdMaqu ?? '');
+      const sheetName = this.createUniqueSheetName(orderCode || 'Orden');
+      orderSheetNames.set(orderCode, sheetName);
+
+      return {
+        orderCode,
+        machineCode: String(item.CodiMaqu ?? ''),
+        estado: String(item.NombreEstado ?? ''),
+        sheetName,
+      };
+    });
+
+    const worksheets = [
+      this.buildSummaryWorksheet(summaryRows),
+      this.buildIndexWorksheet(indexRows),
+      ...this.filteredResults.map((item) =>
+        this.buildOrderDetailWorksheet(item, maintenanceDetails.get(Number(item.idMantenimiento)), orderSheetNames.get(String(item.CodiOrdMaqu ?? '')) || 'Orden')
+      ),
+    ].join('');
 
     return `<?xml version="1.0"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
@@ -179,14 +257,167 @@ export class OrdenServicioModalComponent implements OnInit {
       <Font ss:Bold="1"/>
       <Interior ss:Color="#D9EAF2" ss:Pattern="Solid"/>
     </Style>
+    <Style ss:ID="section">
+      <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+      <Interior ss:Color="#1F6F8B" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="label">
+      <Font ss:Bold="1"/>
+      <Interior ss:Color="#F3F7F9" ss:Pattern="Solid"/>
+    </Style>
+    <Style ss:ID="link">
+      <Font ss:Color="#0563C1" ss:Underline="Single"/>
+    </Style>
   </Styles>
-  <Worksheet ss:Name="OrdenesServicio">
+  ${worksheets}
+</Workbook>`;
+  }
+
+  private buildSummaryWorksheet(rows: Record<string, unknown>[]): string {
+    const headers = rows.length > 0 ? Object.keys(rows[0]) : ['Sin datos'];
+    const headerCells = headers
+      .map((header) => `<Cell ss:StyleID="header"><Data ss:Type="String">${this.escapeXml(header)}</Data></Cell>`)
+      .join('');
+
+    const dataRows = rows.length > 0
+      ? rows.map((row) => {
+          const cells = headers
+            .map((header) => `<Cell><Data ss:Type="String">${this.escapeXml(String(row[header] ?? ''))}</Data></Cell>`)
+            .join('');
+
+          return `<Row>${cells}</Row>`;
+        }).join('')
+      : `<Row><Cell><Data ss:Type="String">No hay órdenes para exportar</Data></Cell></Row>`;
+
+    return `<Worksheet ss:Name="Resumen Ordenes">
     <Table>
       <Row>${headerCells}</Row>
       ${dataRows}
     </Table>
-  </Worksheet>
-</Workbook>`;
+  </Worksheet>`;
+  }
+
+  private buildIndexWorksheet(indexRows: Array<{ orderCode: string; machineCode: string; estado: string; sheetName: string }>): string {
+    const rows = indexRows.length > 0
+      ? indexRows.map((item) => `<Row>
+          <Cell ss:StyleID="link" ss:HRef="#${this.escapeXml(item.sheetName)}!A1"><Data ss:Type="String">${this.escapeXml(item.orderCode)}</Data></Cell>
+          <Cell><Data ss:Type="String">${this.escapeXml(item.machineCode)}</Data></Cell>
+          <Cell><Data ss:Type="String">${this.escapeXml(item.estado)}</Data></Cell>
+          <Cell><Data ss:Type="String">Abrir detalle</Data></Cell>
+        </Row>`).join('')
+      : `<Row><Cell><Data ss:Type="String">No hay órdenes para indexar</Data></Cell></Row>`;
+
+    return `<Worksheet ss:Name="Indice Ordenes">
+    <Table>
+      <Row>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Número de Orden</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Código Máquina</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Estado</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Acceso</Data></Cell>
+      </Row>
+      ${rows}
+    </Table>
+  </Worksheet>`;
+  }
+
+  private buildOrderDetailWorksheet(order: any, detail: any, sheetName: string): string {
+    const actividades = this.parseJsonArray(detail?.Actividades);
+    const causas = this.parseJsonArray(detail?.Causas);
+    const repuestos = this.parseJsonArray(order?.Repuestos);
+
+    const headerRows = [
+      `<Row><Cell ss:StyleID="section"><Data ss:Type="String">Detalle de la orden ${this.escapeXml(String(order.CodiOrdMaqu ?? ''))}</Data></Cell></Row>`,
+      this.buildLabelValueRow('Código Orden', order.CodiOrdMaqu),
+      this.buildLabelValueRow('Código Máquina', order.CodiMaqu),
+      this.buildLabelValueRow('Fecha Inicio', this.formatExcelDate(order.Fecha_inicio)),
+      this.buildLabelValueRow('Fecha Programada', this.formatExcelDate(order.FechaProgramada)),
+      this.buildLabelValueRow('Fecha Fin', this.formatExcelDate(order.fechaFin)),
+      this.buildLabelValueRow('Tipo Mantenimiento', order.TipoMant),
+      this.buildLabelValueRow('ID Mantenimiento', order.idMantenimiento),
+      this.buildLabelValueRow('Estado', order.NombreEstado),
+      `<Row></Row>`,
+      `<Row><Cell ss:StyleID="section"><Data ss:Type="String">Repuestos</Data></Cell></Row>`,
+      `<Row>
+        <Cell ss:StyleID="header"><Data ss:Type="String">ID Repuesto</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Cantidad</Data></Cell>
+      </Row>`,
+      this.buildSimpleTableRows(repuestos, [
+        { key: 'idRepues', fallback: '' },
+        { key: 'cantid', fallback: '' },
+      ]),
+      `<Row></Row>`,
+      `<Row><Cell ss:StyleID="section"><Data ss:Type="String">Actividades de mantenimiento</Data></Cell></Row>`,
+      `<Row>
+        <Cell ss:StyleID="header"><Data ss:Type="String">ID Actividad</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Código</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Nombre</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Descripción</Data></Cell>
+      </Row>`,
+      this.buildSimpleTableRows(actividades, [
+        { key: 'IdActiMant', fallback: '' },
+        { key: 'CodiActi', fallback: '' },
+        { key: 'NombActi', fallback: '' },
+        { key: 'Descri', fallback: '' },
+      ]),
+      `<Row></Row>`,
+      `<Row><Cell ss:StyleID="section"><Data ss:Type="String">Causas de mantenimiento</Data></Cell></Row>`,
+      `<Row>
+        <Cell ss:StyleID="header"><Data ss:Type="String">ID Causa</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Código</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Nombre</Data></Cell>
+        <Cell ss:StyleID="header"><Data ss:Type="String">Descripción</Data></Cell>
+      </Row>`,
+      this.buildSimpleTableRows(causas, [
+        { key: 'IdCausMant', fallback: '' },
+        { key: 'CodiCaus', fallback: '' },
+        { key: 'NombCaus', fallback: '' },
+        { key: 'Descri', fallback: '' },
+      ]),
+      `<Row></Row>`,
+      `<Row><Cell ss:StyleID="link" ss:HRef="#Indice Ordenes!A1"><Data ss:Type="String">Volver al índice</Data></Cell></Row>`,
+    ].join('');
+
+    return `<Worksheet ss:Name="${this.escapeXml(sheetName)}"><Table>${headerRows}</Table></Worksheet>`;
+  }
+
+  private buildLabelValueRow(label: string, value: unknown): string {
+    return `<Row>
+      <Cell ss:StyleID="label"><Data ss:Type="String">${this.escapeXml(label)}</Data></Cell>
+      <Cell><Data ss:Type="String">${this.escapeXml(String(value ?? ''))}</Data></Cell>
+    </Row>`;
+  }
+
+  private buildSimpleTableRows(items: any[], columns: Array<{ key: string; fallback: string }>): string {
+    if (items.length === 0) {
+      return `<Row><Cell><Data ss:Type="String">Sin registros</Data></Cell></Row>`;
+    }
+
+    return items.map((item) => {
+      const cells = columns
+        .map((column) => `<Cell><Data ss:Type="String">${this.escapeXml(String(item?.[column.key] ?? column.fallback))}</Data></Cell>`)
+        .join('');
+
+      return `<Row>${cells}</Row>`;
+    }).join('');
+  }
+
+  private createUniqueSheetName(baseName: string): string {
+    const sanitizedBase = (baseName || 'Orden')
+      .replace(/[\\\/\?\*\[\]:]/g, ' ')
+      .trim()
+      .slice(0, 31) || 'Orden';
+
+    let candidate = sanitizedBase;
+    let counter = 1;
+
+    while (this.sheetNameRegistry.has(candidate)) {
+      const suffix = ` ${counter}`;
+      candidate = `${sanitizedBase.slice(0, Math.max(0, 31 - suffix.length))}${suffix}`;
+      counter += 1;
+    }
+
+    this.sheetNameRegistry.add(candidate);
+    return candidate;
   }
 
   private escapeXml(value: string): string {

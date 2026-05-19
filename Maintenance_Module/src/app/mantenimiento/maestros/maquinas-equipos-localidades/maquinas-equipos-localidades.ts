@@ -36,6 +36,9 @@ export class MaquinasEquiposLocalidadesComponent implements OnInit {
   // Main variables
   CodiPart: string = '';
   CodiMaqu: string = '';
+  showMachineSelector = false;
+  machineSearchTerm = '';
+  machineResults: any[] = [];
   tipoParteId: number | null = null;
   nombreParte: string = '';
   tiposParte: TipoParteOption[] = [];
@@ -65,9 +68,35 @@ export class MaquinasEquiposLocalidadesComponent implements OnInit {
   clearForm(): void {
     this.CodiPart = '';
     this.CodiMaqu = '';
+    this.showMachineSelector = false;
+    this.machineSearchTerm = '';
     this.tipoParteId = null;
     this.nombreParte = '';
     this.isEditing = false;
+  }
+
+  toggleMachineSelector(): void {
+    this.showMachineSelector = !this.showMachineSelector;
+    if (this.showMachineSelector && this.machineResults.length === 0) {
+      this.loadMachines();
+    }
+  }
+
+  get filteredMachineResults(): any[] {
+    const term = this.machineSearchTerm.trim().toLowerCase();
+    if (!term) {
+      return this.machineResults;
+    }
+
+    return this.machineResults.filter(item =>
+      item.CodiMaqu?.toLowerCase().includes(term)
+    );
+  }
+
+  selectMachine(item: any): void {
+    this.CodiMaqu = item.CodiMaqu ?? '';
+    this.machineSearchTerm = '';
+    this.showMachineSelector = false;
   }
 
   private loadTiposParte(): void {
@@ -93,6 +122,27 @@ export class MaquinasEquiposLocalidadesComponent implements OnInit {
       error: () => {
         this.tiposParte = [];
         this.sidebarService.addLog('No se pudieron cargar los tipos de parte');
+      }
+    });
+  }
+
+  private loadMachines(): void {
+    const body = [{
+      CodiCons: 'MaquMant',
+      NombPara: 'Codigo Compañia',
+      Valor: this.companyCode,
+      CodiComp: this.companyCode,
+      Token: this.token,
+      Report: '0'
+    }];
+
+    this.partesService.search(body).subscribe({
+      next: (res) => {
+        this.machineResults = Array.isArray(res) ? res : [];
+      },
+      error: () => {
+        this.machineResults = [];
+        this.sidebarService.addLog('No se pudieron cargar las máquinas');
       }
     });
   }

@@ -27,6 +27,29 @@
       <div class="form-group">
         <label>Código Máquina</label>
         <input type="text" placeholder="Ej: M001" [(ngModel)]="CodiMaqu" name="codigoMaquina" />
+        <button type="button" class="btn-inline-search" (click)="toggleMachineSelector()">
+          {{ showMachineSelector ? 'Ocultar máquinas' : 'Buscar máquina' }}
+        </button>
+
+        @if (showMachineSelector) {
+          <div class="selector-panel">
+            <input
+              type="text"
+              [(ngModel)]="machineSearchTerm"
+              name="machineSearchTerm"
+              placeholder="Buscar por código" />
+
+            <div class="selector-results">
+              @for (item of filteredMachineResults; track item.CodiMaqu) {
+                <button type="button" class="selector-item" (click)="selectMachine(item)">
+                  <strong>{{ item.CodiMaqu }}</strong>
+                </button>
+              } @empty {
+                <p class="selector-empty">No se encontraron máquinas.</p>
+              }
+            </div>
+          </div>
+        }
       </div>
 
       <div class="form-group">

@@ -62,7 +62,9 @@ export class BitacoraPlantaComponent implements OnInit {
           return;
         }
 
-        this.registros = res.map((item: any) => this.normalizeRegistro(item));
+        this.registros = res
+          .map((item: any) => this.normalizeRegistro(item))
+          .sort((a, b) => this.compareRegistrosDesc(a, b));
         console.log(this.registros);
 
         if (this.registros.length === 0) {
@@ -97,5 +99,16 @@ export class BitacoraPlantaComponent implements OnInit {
 
   trackById(_index: number, item: BitacoraPlantaItem): number {
     return item.id;
+  }
+
+  private compareRegistrosDesc(a: BitacoraPlantaItem, b: BitacoraPlantaItem): number {
+    const fechaA = new Date(a.fecha).getTime();
+    const fechaB = new Date(b.fecha).getTime();
+
+    if (Number.isFinite(fechaA) && Number.isFinite(fechaB) && fechaA !== fechaB) {
+      return fechaB - fechaA;
+    }
+
+    return b.id - a.id;
   }
 }

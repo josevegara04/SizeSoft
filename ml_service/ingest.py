@@ -2,8 +2,9 @@ import os
 import chromadb
 from chromadb.utils import embedding_functions
 
-DOCS_PATH = "./docs"
-CHROMA_PATH = "./chroma_db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DOCS_PATH = os.getenv("DOCS_PATH", os.path.join(BASE_DIR, "docs"))
+CHROMA_PATH = os.getenv("CHROMA_PATH", os.path.join(BASE_DIR, "chroma_db"))
 
 def load_documents(chunk_size=600, overlap=100):
     docs = []

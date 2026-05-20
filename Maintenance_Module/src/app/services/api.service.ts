@@ -147,7 +147,41 @@ export class ApiService {
 
   constructor(private http: HttpClient, private msgSrv: MessagService, private modalService: NgbModal, private cookieService: CookieService) {
     this.VersApli = '1.4.12';
-    this.configureApiEndpoints();
+    var lstrAmbiente = 'Pruebas';
+    //var lstrAmbiente = 'Pruebas';
+    //var lstrAmbiente = 'Producción';
+    if (lstrAmbiente == 'Desarrollo' || lstrAmbiente == 'Pruebas') {
+      this.Title = 'SizeSoft ERP - ' + lstrAmbiente;
+    }
+    if (lstrAmbiente == 'Desarrollo') {
+      this.apiUrl = 'https://localhost:44371/api/Query';
+      this.apiUrlLI = 'https://localhost:44371/users/authenticate';
+      this.apiUrlSave = 'https://localhost:44371/api/Query/Save';
+      this.apiUrlPU = 'https://localhost:44371/users/PaswUsua';
+      this.apiUrlXML = 'https://localhost:44371/XML/getXML';
+      this.apiUrlConsDocu = 'https://localhost:44371/XML/ConsDocu';
+      this.apiUrlMail = 'https://localhost:44371/XML/SendMail';
+      this.apiUrlConsReso = 'https://localhost:44371/XML/ConsReso';
+      this.apiUrlVeriCert = 'https://localhost:44371/XML/TestCert';
+      this.apiUrlEvents = 'https://localhost:44371/XML/EnviEven';
+      this.apiUrlLeerFact = 'https://localhost:44371/XML/LeerFact';
+      this.apiPdfUrl = 'https://localhost:44371/Pdf/';
+      this.apiOtrosUrl = 'https://localhost:44371/Otros/';
+    } else if (lstrAmbiente == 'Pruebas') {
+      this.apiUrl = 'https://erpapipruebas.azurewebsites.net/api/Query';
+      this.apiUrlLI = 'https://erpapipruebas.azurewebsites.net/users/authenticate';
+      this.apiUrlSave = 'https://erpapipruebas.azurewebsites.net/api/Query/Save';
+      this.apiUrlPU = 'https://erpapipruebas.azurewebsites.net/users/PaswUsua';
+      this.apiUrlXML = 'https://erpapipruebas.azurewebsites.net/XML/getXML';
+      this.apiUrlConsDocu = 'https://erpapipruebas.azurewebsites.net/XML/ConsDocu';
+      this.apiUrlMail = 'https://erpapipruebas.azurewebsites.net/XML/SendMail';
+      this.apiUrlConsReso = 'https://erpapipruebas.azurewebsites.net/XML/ConsReso';
+      this.apiUrlVeriCert = 'https://erpapipruebas.azurewebsites.net/XML/TestCert';
+      this.apiUrlEvents = 'https://erpapipruebas.azurewebsites.net/XML/EnviEven';
+      this.apiUrlLeerFact = 'https://erpapipruebas.azurewebsites.net/XML/LeerFact';
+      this.apiPdfUrl = 'https://erpapipruebas.azurewebsites.net/Pdf/';
+      this.apiOtrosUrl = 'https://erpapipruebas.azurewebsites.net/Otros/';
+    }
     //Obtener la dirección IP del usuario
     this.getIPAddress().subscribe((res: any) => {
       this.clsUser.Ip = res.ip;
@@ -161,29 +195,6 @@ export class ApiService {
       });
     });
     this.restoreSession();
-  }
-
-  private configureApiEndpoints() {
-    const baseUrl = environment.erpApiBaseUrl.replace(/\/+$/, '');
-    const environmentName = environment.erpEnvironmentName?.trim();
-
-    if (environmentName) {
-      this.Title = `SizeSoft ERP - ${environmentName}`;
-    }
-
-    this.apiUrl = `${baseUrl}/api/Query`;
-    this.apiUrlLI = `${baseUrl}/users/authenticate`;
-    this.apiUrlSave = `${baseUrl}/api/Query/Save`;
-    this.apiUrlPU = `${baseUrl}/users/PaswUsua`;
-    this.apiUrlXML = `${baseUrl}/XML/getXML`;
-    this.apiUrlConsDocu = `${baseUrl}/XML/ConsDocu`;
-    this.apiUrlMail = `${baseUrl}/XML/SendMail`;
-    this.apiUrlConsReso = `${baseUrl}/XML/ConsReso`;
-    this.apiUrlVeriCert = `${baseUrl}/XML/TestCert`;
-    this.apiUrlEvents = `${baseUrl}/XML/EnviEven`;
-    this.apiUrlLeerFact = `${baseUrl}/XML/LeerFact`;
-    this.apiPdfUrl = `${baseUrl}/Pdf/`;
-    this.apiOtrosUrl = `${baseUrl}/Otros/`;
   }
   getQuery(): Observable<any> {
     this.lastHttpError = null;

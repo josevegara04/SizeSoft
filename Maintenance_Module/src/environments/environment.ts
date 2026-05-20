@@ -1,1 +1,4 @@
-export { environment } from './environment.development';
+export const environment = {
+    production: false,
+    skipLogin: false
+  };

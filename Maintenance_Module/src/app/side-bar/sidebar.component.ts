@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MarkdownComponent } from 'ngx-markdown';
-import { environment } from '../../environments/environment';
 
 interface Message {
   role: 'user' | 'bot';
@@ -19,8 +18,6 @@ interface Message {
   imports: [CommonModule, FormsModule, MarkdownComponent],
 })
 export class SidebarComponent implements AfterViewChecked {
-  private readonly chatUrl = `${environment.aiServiceUrl.replace(/\/+$/, '')}/chat`;
-
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   @ViewChild('logContainer') logContainer!: ElementRef;
 
@@ -63,7 +60,7 @@ export class SidebarComponent implements AfterViewChecked {
     this.loading = true;
 
     this.http.post<{ response: string, session_id: string }>(
-      this.chatUrl,
+      'http://localhost:8000/chat',
       { message: msg, session_id: this.sessionId }
     ).subscribe({
       next: (res) => {

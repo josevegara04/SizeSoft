@@ -3,5 +3,5 @@ export const environment = {
   skipLogin: false,
   erpEnvironmentName: 'Pruebas',
   erpApiBaseUrl: 'https://erpapipruebas.azurewebsites.net',
-  aiServiceUrl: 'https://your-render-service.onrender.com',
+  aiServiceUrl: 'https://sizesoft.onrender.com',
 };

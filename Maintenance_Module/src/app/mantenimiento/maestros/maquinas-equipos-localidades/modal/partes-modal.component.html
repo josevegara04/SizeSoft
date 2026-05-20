@@ -1,86 +1,65 @@
-<!-- MODAL BUSQUEDA -->
 <div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <span class="modal-kicker">Consulta de maestros</span>
+        <h2>Búsqueda de Partes</h2>
+      </div>
+      <button type="button" class="icon-close" (click)="cerrarModal()" title="Cerrar">✕</button>
+    </div>
 
-    <div class="modal">
-  
-      <h2>Búsqueda de Partes</h2>
-  
-      <!-- FORM FILTROS -->
-      <form class="modal-form" (ngSubmit)="handleSearch()">
-  
-        <div class="form-group">
-          <label>Código Parte</label>
-          <input type="text" placeholder="Ej: A001" [(ngModel)]="CodiPart" name="codigoParte"/>
+    <section class="results-panel">
+      <div class="results-header">
+        <div>
+          <span class="modal-kicker">Resultados</span>
+          <h3>Listado de partes</h3>
         </div>
-  
-        <div class="form-group">
-          <label>Código Máquina</label>
-          <input type="text" placeholder="Ej: M001" [(ngModel)]="CodiMaqu" name="codigoMaquina"/>
-        </div>
-  
-        <div class="form-group">
-          <label>Tipo Parte</label>
-          <input type="number" [(ngModel)]="idTipoPart" name="tipoParte"/>
-        </div>
-  
-        <div class="form-group">
-          <label>Nombre Parte</label>
-          <input type="text" placeholder="Ej: Filtro" [(ngModel)]="nombreParte" name="nombreParte"/>
-        </div>
-  
-  
-        <!-- BOTONES -->
-        <div class="modal-actions">
-          <button type="submit" class="btn-primary">Buscar</button>
-          <button type="button" class="btn-danger" (click)="cerrarModal()">Cerrar</button>
-        </div>
-      </form>
-  
-      <!-- TABLA -->
+        <span class="count-pill">{{ filteredResults.length }} registros</span>
+      </div>
+
       <div class="modal-table">
-  
         <table>
-  
           <thead>
             <tr>
               <th>Código</th>
               <th>Tipo</th>
+              <th>Nombre Tipo</th>
               <th>Máquina</th>
               <th>Nombre</th>
             </tr>
-  
-            <!-- FILTROS -->
+
             <tr class="filters-row">
-              <th><input type="text" [(ngModel)]="filterCodiPart" />
-              <th><input type="text" [(ngModel)]="filterTipoPart" /></th>
-              <th><input type="text" [(ngModel)]="filterCodiMaqu" />
-              <th><input type="text" [(ngModel)]="filterNombreParte" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterCodiPart" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterTipoPart" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterNombreTipoParte" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterCodiMaqu" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterNombreParte" /></th>
             </tr>
           </thead>
-  
-          <tbody>
 
-            <!-- DATOS -->
-            <tr *ngFor="let item of filteredResults">
-              <td>{{ item.CodiPart }}</td>
-              <td>{{ item.idTipoParte }}</td>
+          <tbody>
+            <tr *ngFor="let item of filteredResults" (click)="selectRow(item)">
+              <td><code>{{ item.CodiPart }}</code></td>
+              <td>{{ item.IdTipoPart || '-' }}</td>
+              <td>{{ item.NombreTipoParte }}</td>
               <td>{{ item.CodiMaqu }}</td>
               <td>{{ item.NombreParte }}</td>
             </tr>
-          
-            <!-- SIN DATOS -->
+
             <tr *ngIf="results.length === 0">
-              <td colspan="4" class="no-data">
-                No data to display.
+              <td colspan="5" class="no-data">
+                No hay partes registradas.
               </td>
             </tr>
-          
+
+            <tr *ngIf="results.length > 0 && filteredResults.length === 0">
+              <td colspan="5" class="no-data">
+                No hay coincidencias con los filtros aplicados.
+              </td>
+            </tr>
           </tbody>
-  
         </table>
-  
       </div>
-  
-    </div>
-  
+    </section>
   </div>
+</div>

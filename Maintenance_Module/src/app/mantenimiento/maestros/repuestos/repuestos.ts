@@ -1,198 +1,164 @@
-import { Component, signal, computed } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
-import { Repuesto } from './repuesto.model';
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { PartesMaquinaService } from '../maquinas-equipos-localidades/services/partes-maquina.service';
+import { ApiService } from '../../../services/api.service';
+import { SidebarService } from '../../../side-bar/sidebar.service';
+import { RepuestosModalComponent } from './modal/repuestos-modal.component';
+import { RepuestosService } from './repuestos.service';
 
 @Component({
   selector: 'app-repuestos',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule, RepuestosModalComponent],
   templateUrl: './repuestos.component.html',
-  styleUrl: './repuestos.component.css',
+  styleUrls: ['./repuestos.component.css'],
 })
 export class RepuestosComponent {
-  // ──── State ────
-  private nextId = 6;
-  readonly searchTerm = signal('');
-  readonly showDropdown = signal(false);
-  readonly editingRepuesto = signal<Repuesto | null>(null);
-  readonly deletingId = signal<number | null>(null);
-  readonly selectedRepuesto = signal<Repuesto | null>(null);
-  readonly editingInlineId = signal<number | null>(null);
-  readonly notification = signal<{ type: 'success' | 'error'; message: string } | null>(null);
+  constructor(
+    private repuestosService: RepuestosService,
+    private partesService: PartesMaquinaService,
+    private apiService: ApiService,
+    private sidebarService: SidebarService,
+  ) {}
 
-  readonly repuestos = signal<Repuesto[]>([
-    {
-      id: 1,
-      codigo: 'REP-001',
-      nombre: 'Rodamiento 6205',
-      descripcion: 'Rodamiento rígido de bolas SKF 6205-2RS',
-      categoria: 'Mecánico',
-      unidadMedida: 'Unidad',
-      cantidadStock: 25,
-      stockMinimo: 10,
-      precioUnitario: 18500,
-      ubicacion: 'Almacén A - Estante 2',
-      proveedor: 'SKF Colombia',
-      activo: true,
-    },
-    {
-      id: 2,
-      codigo: 'REP-002',
-      nombre: 'Correa Dentada HTD 5M',
-      descripcion: 'Correa de transmisión dentada 5M-450, ancho 15mm',
-      categoria: 'Mecánico',
-      unidadMedida: 'Unidad',
-      cantidadStock: 4,
-      stockMinimo: 5,
-      precioUnitario: 42000,
-      ubicacion: 'Almacén A - Estante 5',
-      proveedor: 'Gates Industrial',
-      activo: true,
-    },
-    {
-      id: 3,
-      codigo: 'REP-003',
-      nombre: 'Contactor Tripolar 32A',
-      descripcion: 'Contactor electromagnético Schneider LC1D32 220V',
-      categoria: 'Eléctrico',
-      unidadMedida: 'Unidad',
-      cantidadStock: 8,
-      stockMinimo: 3,
-      precioUnitario: 185000,
-      ubicacion: 'Almacén B - Panel 1',
-      proveedor: 'Schneider Electric',
-      activo: true,
-    },
-    {
-      id: 4,
-      codigo: 'REP-004',
-      nombre: 'Aceite Hidráulico ISO 68',
-      descripcion: 'Aceite mineral para sistemas hidráulicos, viscosidad ISO 68',
-      categoria: 'Lubricante',
-      unidadMedida: 'Litro',
-      cantidadStock: 120,
-      stockMinimo: 50,
-      precioUnitario: 22000,
-      ubicacion: 'Almacén C - Zona de líquidos',
-      proveedor: 'Mobil Industrial',
-      activo: true,
-    },
-    {
-      id: 5,
-      codigo: 'REP-005',
-      nombre: 'Filtro de Aire Comprimido',
-      descripcion: 'Elemento filtrante para unidad FRL 1/2"',
-      categoria: 'Filtro',
-      unidadMedida: 'Unidad',
-      cantidadStock: 2,
-      stockMinimo: 4,
-      precioUnitario: 35000,
-      ubicacion: 'Almacén A - Estante 8',
-      proveedor: 'SMC Neumática',
-      activo: false,
-    },
-  ]);
+  showModal = false;
 
-  // ──── Computed ────
-  readonly filteredRepuestos = computed(() => {
-    const term = this.searchTerm().toLowerCase().trim();
-    if (!term) return this.repuestos();
-    return this.repuestos().filter(
-      (r) =>
-        r.codigo.toLowerCase().includes(term) ||
-        r.nombre.toLowerCase().includes(term) ||
-        r.categoria.toLowerCase().includes(term) ||
-        r.unidadMedida.toLowerCase().includes(term) ||
-        r.cantidadStock.toString().includes(term) ||
-        r.precioUnitario.toString().includes(term) ||
-        r.ubicacion.toLowerCase().includes(term) ||
-        r.proveedor.toLowerCase().includes(term)
+  idRepuesto: number | null = null;
+  codiPart = '';
+  cantid: number | null = null;
+  nombreParte = '';
+  showPartSelector = false;
+  partSearchTerm = '';
+  partResults: any[] = [];
+
+  openModal(): void {
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+  }
+
+  onSelectRepuesto(item: any): void {
+    this.idRepuesto = this.toNumber(item.idRepuesto ?? item.IdRepuesto ?? item['ID Repuesto']);
+    this.codiPart = item.CodiPart ?? item['Código Parte'] ?? item['Codigo Parte'] ?? '';
+    this.cantid = this.toNumber(item.Cantid ?? item['Cantidad']);
+    this.nombreParte = item.NombreParte ?? item['Nombre Parte'] ?? '';
+    this.closeModal();
+  }
+
+  clearForm(): void {
+    this.idRepuesto = null;
+    this.codiPart = '';
+    this.cantid = null;
+    this.nombreParte = '';
+    this.partSearchTerm = '';
+    this.showPartSelector = false;
+  }
+
+  get filteredPartResults(): any[] {
+    const term = this.partSearchTerm.trim().toLowerCase();
+    if (!term) {
+      return this.partResults;
+    }
+
+    return this.partResults.filter(item =>
+      item.CodiPart?.toLowerCase().includes(term) ||
+      item.NombreParte?.toLowerCase().includes(term)
     );
-  });
-
-  // ──── Form data ────
-  formData: Omit<Repuesto, 'id'> = this.emptyFormData();
-  inlineData: Omit<Repuesto, 'id'> = this.emptyFormData();
-
-  private emptyFormData(): Omit<Repuesto, 'id'> {
-    return {
-      codigo: '',
-      nombre: '',
-      descripcion: '',
-      categoria: '',
-      unidadMedida: '',
-      cantidadStock: 0,
-      stockMinimo: 0,
-      precioUnitario: 0,
-      ubicacion: '',
-      proveedor: '',
-      activo: true,
-    };
   }
 
-  // ──── Actions ────
-  selectRepuesto(repuesto: Repuesto): void {
-    this.selectedRepuesto.set(repuesto);
-    this.showDropdown.set(false);
-    this.searchTerm.set('');
-  }
+  togglePartSelector(): void {
+    this.showPartSelector = !this.showPartSelector;
 
-  saveRepuesto(form: NgForm): void {
-    const editing = this.editingRepuesto();
-    if (editing) {
-      this.repuestos.update((list) =>
-        list.map((r) => (r.id === editing.id ? { ...r, ...this.formData } : r))
-      );
-      this.showNotification('success', 'Repuesto actualizado correctamente.');
-    } else {
-      const newRepuesto: Repuesto = {
-        id: this.nextId++,
-        ...this.formData,
-      };
-      this.repuestos.update((list) => [...list, newRepuesto]);
-      this.showNotification('success', 'Repuesto registrado correctamente.');
+    if (this.showPartSelector && this.partResults.length === 0) {
+      this.loadParts();
     }
-    this.formData = this.emptyFormData();
-    this.editingRepuesto.set(null);
-    form.resetForm();
   }
 
-  // ──── Inline Edit ────
-  startInlineEdit(repuesto: Repuesto): void {
-    this.editingInlineId.set(repuesto.id);
-    this.inlineData = { ...repuesto };
+  selectPart(item: any): void {
+    this.codiPart = item.CodiPart ?? '';
+    this.nombreParte = item.NombreParte ?? '';
+    this.partSearchTerm = '';
+    this.showPartSelector = false;
   }
 
-  saveInlineEdit(): void {
-    const id = this.editingInlineId();
-    if (id !== null) {
-      this.repuestos.update((list) =>
-        list.map((r) => (r.id === id ? { ...r, ...this.inlineData } : r))
-      );
-      this.showNotification('success', 'Repuesto actualizado correctamente.');
+  handleRepuesto(action: number): void {
+    if (action === 1 || action === 3) {
+      if (this.idRepuesto === null || !this.codiPart || this.cantid === null || this.cantid <= 0) {
+        this.sidebarService.addLog('Complete los campos obligatorios del repuesto');
+        return;
+      }
     }
-    this.editingInlineId.set(null);
+
+    if (action === 2 && this.idRepuesto === null) {
+      this.sidebarService.addLog('Seleccione un repuesto para eliminar');
+      return;
+    }
+
+    const body = [{
+      idRepuesto: this.idRepuesto,
+      CodiPart: this.codiPart,
+      Cantid: this.cantid,
+      CodiUsua: this.apiService.clsUser.Id,
+      NombUsua: this.apiService.clsUser.NombUsua,
+      CodiComp: this.apiService.clsUser.CodiComp,
+      Entidad: 302,
+      Token: this.apiService.lstrToken,
+      Accion: action,
+    }];
+
+    this.repuestosService.save(body).subscribe({
+      next: (res) => {
+        this.sidebarService.addLog(this.extractMessage(res, 'Operación completada'));
+        if (action === 2) {
+          this.clearForm();
+        }
+      },
+      error: () => {
+        this.sidebarService.addLog('Error al procesar el repuesto');
+      },
+    });
   }
 
-  cancelInlineEdit(): void {
-    this.editingInlineId.set(null);
+  private extractMessage(response: any, fallback: string): string {
+    const rawMessage = response?.[0]?.Messag ?? response?.[0]?.message;
+    if (!rawMessage) {
+      return fallback;
+    }
+
+    try {
+      const parsed = JSON.parse(rawMessage);
+      return parsed?.message || rawMessage;
+    } catch {
+      return rawMessage;
+    }
   }
 
-  // ──── Delete ────
-  getDeletingRepuesto(): Repuesto | undefined {
-    const id = this.deletingId();
-    return this.repuestos().find((r) => r.id === id);
+  private toNumber(value: any): number | null {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
-  confirmDelete(id: number): void {
-    this.repuestos.update((list) => list.filter((r) => r.id !== id));
-    this.deletingId.set(null);
-    this.showNotification('success', 'Repuesto eliminado correctamente.');
-  }
+  private loadParts(): void {
+    const body = [{
+      CodiCons: 'ListPart',
+      NombPara: 'Comp',
+      Valor: this.apiService.clsUser.CodiComp,
+      CodiComp: this.apiService.clsUser.CodiComp,
+      Token: this.apiService.lstrToken,
+      Report: '0',
+    }];
 
-  // ──── Notification ────
-  private showNotification(type: 'success' | 'error', message: string): void {
-    this.notification.set({ type, message });
-    setTimeout(() => this.notification.set(null), 4000);
+    this.partesService.search(body).subscribe({
+      next: (res) => {
+        this.partResults = Array.isArray(res) ? res : [];
+      },
+      error: () => {
+        this.partResults = [];
+        this.sidebarService.addLog('No fue posible cargar las partes');
+      },
+    });
   }
 }

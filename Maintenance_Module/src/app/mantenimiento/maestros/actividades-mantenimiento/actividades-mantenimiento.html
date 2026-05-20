@@ -1,0 +1,96 @@
+<div class="parts-page">
+  <section class="page-hero">
+    <div>
+      <h2>Actividades de Mantenimiento</h2>
+      <p>Administre las actividades estándar asociadas a los diferentes tipos de mantenimiento.</p>
+    </div>
+    <button type="button" class="btn-search hero-action" (click)="openModal()" title="Buscar actividades">
+      <span class="button-icon">🔍</span>
+      Buscar actividades
+    </button>
+  </section>
+
+  <section class="form-panel">
+    <div class="panel-header">
+      <div>
+        <span class="section-kicker">Ficha de actividad</span>
+        <h3>Información general</h3>
+      </div>
+    </div>
+
+    <div class="form-container">
+      <div class="form-group">
+        <label>ID actividad</label>
+        <input type="number" placeholder="Ej: 1" [(ngModel)]="IdActiMant" name="idActiMant" />
+      </div>
+
+      <div class="form-group">
+        <label>Código actividad</label>
+        <input type="text" placeholder="Ej: LUBRICARR" [(ngModel)]="CodiActi" name="codiActi" />
+      </div>
+
+      <div class="form-group">
+        <label>Nombre actividad</label>
+        <input type="text" placeholder="Ej: Lubricar componentes" [(ngModel)]="NombActi" name="nombActi" />
+      </div>
+
+      <div class="form-group">
+        <label>Descripción</label>
+        <input
+          type="text"
+          placeholder="Ej: Aplicar lubricante en piezas móviles"
+          [(ngModel)]="Descri"
+          name="descri"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Tipo Mantenimiento</label>
+        <select [(ngModel)]="TipoMant" name="tipoMant">
+          <option value="">Seleccione</option>
+          <option value="Preventivo">Preventivo</option>
+          <option value="Correctivo">Correctivo</option>
+          <option value="Reactivo">Reactivo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Activo</label>
+        <select [(ngModel)]="Activo" name="activo">
+          <option [ngValue]="1">Activo</option>
+          <option [ngValue]="0">Inactivo</option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="clearForm()">
+          Limpiar
+        </button>
+
+        @if (!isEditing) {
+          <button type="button" class="btn-primary" (click)="handleActivity(1)">
+            <span class="button-icon">💾</span>
+            Guardar
+          </button>
+        }
+
+        @if (isEditing) {
+          <button type="button" class="btn-primary" (click)="handleActivity(3)">
+            <span class="button-icon">✏️</span>
+            Guardar cambios
+          </button>
+          <button type="button" class="btn-danger" (click)="handleActivity(2)">
+            <span class="button-icon">🗑️</span>
+            Eliminar
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+</div>
+
+<app-actividades-mantenimiento-modal
+  *ngIf="showModal"
+  (close)="closeModal()"
+  (select)="fillForm($event)">
+</app-actividades-mantenimiento-modal>

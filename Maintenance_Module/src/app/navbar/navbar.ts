@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
@@ -13,6 +13,7 @@ import { CommonModule } from "@angular/common"
 })
 export class Navbar implements OnInit {
   private readonly router = inject(Router);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
   public readonly apiService = inject(ApiService);
 
   protected readonly isMaestrosActive = signal(false);
@@ -29,6 +30,15 @@ export class Navbar implements OnInit {
       .subscribe(() => this.updateActiveStates());
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as Node | null;
+
+    if (target && !this.elementRef.nativeElement.contains(target)) {
+      this.closeMenus();
+    }
+  }
+
   private updateActiveStates(): void {
     const url = this.router.url;
     this.isMaestrosActive.set(url.startsWith('/mantenimiento/maestros'));
@@ -41,8 +51,8 @@ export class Navbar implements OnInit {
     this.apiService.lboolUserLogged = false;
   }
 
-  toggleMaquinas(): void {
-    console.log("actriva");
+  toggleMaquinas(event?: MouseEvent): void {
+    event?.stopPropagation();
     this.isMaquinasActive.set(!this.isMaquinasActive());
   }
 
@@ -51,13 +61,26 @@ export class Navbar implements OnInit {
     return this.apiService.clsUser.NombUsua?.trim() || 'Usuario 1';
   }
 
-  toggleMaestros(): void {
+  toggleMaestros(event?: MouseEvent): void {
+    event?.stopPropagation();
     this.isMaestrosOpen.set(!this.isMaestrosOpen());
     this.isTransaccionesOpen.set(false);
+
+    if (!this.isMaestrosOpen()) {
+      this.isMaquinasActive.set(false);
+    }
   }
-  
-  toggleTransacciones(): void {
+
+  toggleTransacciones(event?: MouseEvent): void {
+    event?.stopPropagation();
     this.isTransaccionesOpen.set(!this.isTransaccionesOpen());
     this.isMaestrosOpen.set(false);
+    this.isMaquinasActive.set(false);
+  }
+
+  closeMenus(): void {
+    this.isMaestrosOpen.set(false);
+    this.isTransaccionesOpen.set(false);
+    this.isMaquinasActive.set(false);
   }
 }

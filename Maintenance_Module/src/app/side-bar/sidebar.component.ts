@@ -19,6 +19,7 @@ interface Message {
 })
 export class SidebarComponent implements AfterViewChecked {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
+  @ViewChild('logContainer') logContainer!: ElementRef;
 
   chatOpen = false;
   userInput = '';
@@ -39,7 +40,11 @@ export class SidebarComponent implements AfterViewChecked {
   }
 
   ngAfterViewChecked() {
-    this.scrollToBottom();
+    if (this.chatOpen) {
+      this.scrollToBottom();
+    } else {
+      this.scrollLogsToBottom();
+    }
   }
 
   toggleChat() {
@@ -61,10 +66,12 @@ export class SidebarComponent implements AfterViewChecked {
       next: (res) => {
         this.messages.push({ role: 'bot', content: res.response });
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.messages.push({ role: 'bot', content: 'Error al conectar con el asistente. Intenta de nuevo.' });
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -72,6 +79,40 @@ export class SidebarComponent implements AfterViewChecked {
   private scrollToBottom() {
     if (this.messagesContainer) {
       const el = this.messagesContainer.nativeElement;
+      el.scrollTop = el.scrollHeight;
+    }
+  }
+
+  getLogMessage(log: unknown): string {
+    if (typeof log === 'string') {
+      return log;
+    }
+
+    if (log && typeof log === 'object' && 'message' in log) {
+      return String((log as { message: unknown }).message ?? '');
+    }
+
+    return String(log ?? '');
+  }
+
+  getLogTime(log: unknown): string {
+    let rawDate: Date;
+
+    if (log && typeof log === 'object' && 'createdAt' in log) {
+      rawDate = new Date((log as { createdAt: string | number | Date }).createdAt);
+    } else {
+      rawDate = new Date();
+    }
+
+    return rawDate.toLocaleTimeString('es-CO', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  scrollLogsToBottom() {
+    if (this.logContainer) {
+      const el = this.logContainer.nativeElement;
       el.scrollTop = el.scrollHeight;
     }
   }

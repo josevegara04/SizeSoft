@@ -93,6 +93,7 @@ export class LoginComponent implements OnInit {
               this.apiService.lstrRutaLogo = './assets/icons/Cia' + this.apiService.clsUser.CodiComp + '.jpg';
               //Establecer la cookie de la aplicación
               this.cookieService.set('ERPCookie' + this.apiService.clsUser.CodiComp + this.apiService.clsUser.Id.toUpperCase(), this.apiService.lstrToken);
+              this.apiService.persistSession();
               //Buscar el logo de la compañía
               this.apiService.fnBuscLogo();
             }
@@ -258,6 +259,11 @@ export class LoginComponent implements OnInit {
           this.apiService.clsQuery.push({ CodiCons: 'VeriVers', NombPara: 'CodiUsua', Valor: this.apiService.clsUser.Id, CodiComp: '', Token: '', Report: '0' });
           this.apiService.getQuery().subscribe({
             next: (res) => {
+              if (!Array.isArray(res) || res.length === 0) {
+                console.error('VeriVers query error:', this.apiService.lastHttpError ?? res);
+                return;
+              }
+
               //Mostrar los datos en el combo
               this.lQuery = [];
               this.lQuery = res;

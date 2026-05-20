@@ -12,9 +12,14 @@
   </div>
 
   <ng-container *ngIf="!chatOpen">
-    <div class="content">
-      <div class="log" *ngFor="let log of sidebarService.logs$ | async">
-        {{ log }}
+    <div class="content" #logContainer>
+      <div class="log-card" *ngFor="let log of sidebarService.logs$ | async">
+        <div class="log-message">
+          {{ getLogMessage(log) }}
+        </div>
+        <div class="log-time">
+          {{ getLogTime(log) }}
+        </div>
       </div>
     </div>
   </ng-container>

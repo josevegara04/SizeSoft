@@ -1,0 +1,72 @@
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <span class="modal-kicker">Consulta de maestros</span>
+        <h2>Búsqueda de Actividades de Mantenimiento</h2>
+      </div>
+      <button type="button" class="icon-close" (click)="cerrarModal()" title="Cerrar">✕</button>
+    </div>
+
+    <section class="results-panel">
+      <div class="results-header">
+        <div>
+          <span class="modal-kicker">Resultados</span>
+          <h3>Listado de actividades</h3>
+        </div>
+        <span class="count-pill">{{ filteredResults.length }} registros</span>
+      </div>
+
+      <div class="modal-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID Actividad</th>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Tipo Mantenimiento</th>
+              <th>Activo</th>
+            </tr>
+
+            <tr class="filters-row">
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterIdActiMant" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterCodiActi" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterNombActi" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterDescri" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterTipoMant" /></th>
+              <th><input type="text" placeholder="Filtrar" [(ngModel)]="filterActivo" /></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of filteredResults" (click)="selectRow(item)">
+              <td><code>{{ item.IdActiMant || '-' }}</code></td>
+              <td>{{ item.CodiActi || '-' }}</td>
+              <td>{{ item.NombActi || '-' }}</td>
+              <td>{{ item.Descri || '-' }}</td>
+              <td>{{ item.TipoMant || '-' }}</td>
+              <td>
+                <span class="status-pill" [class.inactive]="!item.Activo">
+                  {{ formatActivo(item.Activo) }}
+                </span>
+              </td>
+            </tr>
+
+            <tr *ngIf="results.length === 0">
+              <td colspan="6" class="no-data">
+                No hay actividades de mantenimiento registradas.
+              </td>
+            </tr>
+
+            <tr *ngIf="results.length > 0 && filteredResults.length === 0">
+              <td colspan="6" class="no-data">
+                No hay coincidencias con los filtros aplicados.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>

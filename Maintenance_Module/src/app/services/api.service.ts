@@ -6,6 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { MsgboxComponent } from '../msgbox/msgbox.component';
 import { MessagService } from './messag.service';
 import { CookieService } from 'ngx-cookie-service';
+import { environment } from '../../environments/environment';
 
 function getHttpOptions(token: string) {
   return {
@@ -20,6 +21,7 @@ function getHttpOptions(token: string) {
   providedIn: 'root'
 })
 export class ApiService {
+  private readonly SESSION_STORAGE_KEY = 'maintenance-module-session';
 
   Title: string = 'SizeSoft ERP';
   public VersApli: string = '';
@@ -41,6 +43,7 @@ export class ApiService {
   public ResultRow: any;
   private ResultSubject = new Subject<any>();
   public ResultObservable$ = this.ResultSubject.asObservable();
+  public lastHttpError: any = null;
 
   //Observables búsqueda sensible
   public RowBusqSens: any;
@@ -59,7 +62,7 @@ export class ApiService {
   //Arreglo para recibir valores de parametros en el searchcomponent
   lstrValoPara = [{ NombPara: '', ValoPara: '', HabiPara: 0 }];
   //variables para el control del login
-  lboolUserLogged: boolean = false;
+  lboolUserLogged: boolean = environment.skipLogin ? true : false;
   lboolCerrSesi: boolean = false;
   lstrToken: string = '';
   //Arreglo para facturar las remisiones, cotrizaciones y pedidos
@@ -191,17 +194,10 @@ export class ApiService {
         this.clsUser.Latitu = data.latitude.toString();
       });
     });
-    // 🔥 Restaurar token desde cookie al iniciar
-    if (this.clsUser.CodiComp && this.clsUser.Id) {
-      const cookieKey = 'ERPCookie' + this.clsUser.CodiComp + this.clsUser.Id.toUpperCase();
-      const token = this.cookieService.get(cookieKey);
-      if (token) {
-        this.lstrToken = token;
-        this.lboolUserLogged = true;
-      }
-    }
+    this.restoreSession();
   }
   getQuery(): Observable<any> {
+    this.lastHttpError = null;
     return this.http.post<any>(this.apiUrl, this.clsQuery, getHttpOptions(this.lstrToken)).pipe(
       tap((queryRes: any) => {
         if (!this.lboolCerrSesi) {
@@ -222,6 +218,7 @@ export class ApiService {
                 this.clsUser.NombUsua = '';
                 this.clsUser.PassUsua = '';
                 this.lstrToken = '';
+                this.clearPersistedSession();
                 break;
               }
             }
@@ -233,6 +230,7 @@ export class ApiService {
   }
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
+      this.lastHttpError = error;
       console.error('Control de errores. ', error); // log to console instead
       // Let the app keep running by returning an empty result.
       return of(result as T);
@@ -266,6 +264,7 @@ export class ApiService {
                   const modalRef = this.modalService.open(MsgboxComponent, { size: 'sm', centered: true, windowClass: 'dark-modal' });
                   modalRef.componentInstance.title = 'Message Box';
                 }
+                const cookieKey = 'ERPCookie' + this.clsUser.CodiComp + this.clsUser.Id.toUpperCase();
                 this.lboolUserLogged = false;
                 //Limpiar las variables de identificación del usuario
                 this.clsUser.CodiComp = '';
@@ -273,8 +272,8 @@ export class ApiService {
                 this.clsUser.NombUsua = '';
                 this.clsUser.PassUsua = '';
                 this.lstrToken = '';
-                // 🔥 limpiar cookie también
-                const cookieKey = 'ERPCookie' + this.clsUser.CodiComp + this.clsUser.Id.toUpperCase();
+                this.clearPersistedSession();
+                // limpiar cookie también
                 this.cookieService.delete(cookieKey);
                 return;
               }
@@ -309,12 +308,14 @@ export class ApiService {
         this.clsUser.Id = '';
         this.clsUser.NombUsua = '';
         this.lstrToken = '';
+        this.clearPersistedSession();
         this.msgSrv.clear();
       }, error: err => {
         this.lboolUserLogged = false;
         this.clsUser.CodiComp = '';
         this.clsUser.Id = '';
         this.clsUser.NombUsua = '';
+        this.clearPersistedSession();
       }
     });
   }
@@ -348,5 +349,53 @@ export class ApiService {
         return err;
       })
     );
+  }
+
+  persistSession(): void {
+    if (typeof localStorage === 'undefined') return;
+
+    localStorage.setItem(this.SESSION_STORAGE_KEY, JSON.stringify({
+      CodiComp: this.clsUser.CodiComp,
+      Id: this.clsUser.Id,
+      NombUsua: this.clsUser.NombUsua,
+      Token: this.lstrToken,
+    }));
+  }
+
+  clearPersistedSession(): void {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.removeItem(this.SESSION_STORAGE_KEY);
+  }
+
+  private restoreSession(): void {
+    if (typeof localStorage === 'undefined') return;
+
+    const rawSession = localStorage.getItem(this.SESSION_STORAGE_KEY);
+    if (!rawSession) return;
+
+    try {
+      const session = JSON.parse(rawSession);
+      const codiComp = session?.CodiComp ?? '';
+      const id = session?.Id ?? '';
+      const nombUsua = session?.NombUsua ?? '';
+      const storedToken = session?.Token ?? '';
+
+      if (!codiComp || !id) return;
+
+      const cookieKey = 'ERPCookie' + codiComp + String(id).toUpperCase();
+      const cookieToken = this.cookieService.get(cookieKey);
+      const token = cookieToken || storedToken;
+
+      if (!token) return;
+
+      this.clsUser.CodiComp = codiComp;
+      this.clsUser.Id = id;
+      this.clsUser.NombUsua = nombUsua;
+      this.lstrToken = token;
+      this.lboolUserLogged = true;
+    } catch (error) {
+      console.error('No se pudo restaurar la sesión.', error);
+      this.clearPersistedSession();
+    }
   }
 }

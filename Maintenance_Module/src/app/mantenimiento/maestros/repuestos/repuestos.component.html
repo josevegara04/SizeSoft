@@ -1,238 +1,101 @@
-<!-- ═══════════════ PAGE ═══════════════ -->
-<div class="page-container">
-  <h1 class="page-title">Repuestos</h1>
-
-  <!-- ═══════════════ NOTIFICATION ═══════════════ -->
-  @if (notification()) {
-  <div class="notification" [class.success]="notification()!.type === 'success'"
-    [class.error]="notification()!.type === 'error'">
-    <span class="notification-icon">{{ notification()!.type === 'success' ? '✅' : '⚠️' }}</span>
-    <span class="notification-text">{{ notification()!.message }}</span>
-    <button class="notification-close" (click)="notification.set(null)">✕</button>
-  </div>
-  }
-
-  <!-- ═══════════════ MACHINE SELECTOR CARD ═══════════════ -->
-  <div class="selector-card">
-    <div class="selector-header">
-      <span class="selector-icon">🔧</span>
-      <h2>Seleccionar Máquina</h2>
+<div class="parts-page">
+  <section class="page-hero">
+    <div>
+      <h2>Repuestos</h2>
+      <p>Administre el inventario base de repuestos y su asociación con las partes registradas del módulo.</p>
     </div>
-    <div class="selector-body">
-      <div class="search-box">
-        <label>Buscar máquina por código o nombre</label>
-        <div class="search-input-wrapper">
-          <input type="text" placeholder="Escriba para buscar..." [ngModel]="searchTerm()"
-            (ngModelChange)="searchTerm.set($event)" (focus)="showDropdown.set(true)" />
-          <span class="search-icon">🔍</span>
-        </div>
+    <button type="button" class="btn-search hero-action" (click)="openModal()" title="Buscar repuesto">
+      <span class="button-icon">🔍</span>
+      Buscar repuesto
+    </button>
+  </section>
 
-        @if (showDropdown() && searchTerm().length > 0) {
-        <div class="dropdown-results">
-          @if (filteredRepuestos().length > 0) {
-          @for (r of filteredRepuestos(); track r.id) {
-          <button class="dropdown-item" (click)="selectRepuesto(r)">
-            <span class="item-code">{{ r.codigo }}</span>
-            <span class="item-name">{{ r.nombre }}</span>
-            <span class="item-planta">{{ r.categoria }}</span>
-          </button>
-          }
-          } @else {
-          <p class="no-results">No se encontraron resultados</p>
-          }
-        </div>
-        }
+  <section class="form-panel">
+    <div class="panel-header">
+      <div>
+        <span class="section-kicker">Ficha de repuesto</span>
+        <h3>Información general</h3>
       </div>
-
-      @if (selectedRepuesto()) {
-      <div class="selected-machine">
-        <div class="machine-badge">
-          <span class="badge-label">Seleccionado</span>
-          <span class="badge-code">{{ selectedRepuesto()!.codigo }}</span>
-          <span class="badge-name">{{ selectedRepuesto()!.nombre }}</span>
-          <span class="badge-planta">{{ selectedRepuesto()!.categoria }}</span>
-          <button class="badge-clear" (click)="selectedRepuesto.set(null)">✕</button>
-        </div>
-      </div>
+      @if (idRepuesto !== null) {
+        <span class="status-pill">Editando #{{ idRepuesto }}</span>
       }
     </div>
-  </div>
 
-  <!-- ═══════════════ REGISTER PART FORM ═══════════════ -->
-  <div class="form-card">
-    <div class="form-header">
-      <span class="form-icon">📋</span>
-      <h2>{{ editingRepuesto() ? 'Editar Repuesto' : 'Registrar Nuevo Repuesto' }}</h2>
-    </div>
-    <div class="form-body">
-      <form (ngSubmit)="saveRepuesto(repuestoForm)" #repuestoForm="ngForm">
-        <div class="part-inputs">
-          <div class="field-group">
-            <label>Código <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="formData.codigo" name="codigo" required placeholder="Ej: REP-001" />
-          </div>
-
-          <div class="field-group">
-            <label>Nombre <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="formData.nombre" name="nombre" required placeholder="Nombre del repuesto" />
-          </div>
-
-          <div class="field-group">
-            <label>Categoría <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="formData.categoria" name="categoria" required placeholder="Ej: Mecánico" />
-          </div>
-
-          <div class="field-group">
-            <label>Unidad <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="formData.unidadMedida" name="unidadMedida" required
-              placeholder="Ej litros/unidad" />
-          </div>
-
-          <div class="field-group">
-            <label>Stock <span class="required">*</span></label>
-            <input type="number" [(ngModel)]="formData.cantidadStock" name="cantidadStock" required
-              placeholder="Ej 100" />
-          </div>
-
-          <div class="field-group">
-            <label>Precio Unitario <span class="required">*</span></label>
-            <input type="number" [(ngModel)]="formData.precioUnitario" name="precioUnitario" required
-              placeholder="Ej 100" />
-          </div>
-
-          <div class="field-group">
-            <label>Ubicación <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="formData.ubicacion" name="ubicacion" required placeholder="Ej: Estante 1" />
-          </div>
-
-          <div class="field-group">
-            <label>Proveedor <span class="required">*</span></label>
-            <input type="text" [(ngModel)]="formData.proveedor" name="proveedor" required
-              placeholder="Ej: Proveedor 1" />
-          </div>
-
-          <div class="field-action">
-            <button class="btn-register" type="submit" [disabled]="!repuestoForm.valid">
-              <span>💾</span>
-              {{ editingRepuesto() ? 'Guardar' : 'Registrar' }}
-            </button>
-          </div>
-        </div>
-
-        @if (!repuestoForm.valid && repuestoForm.submitted) {
-        <p class="hint-message">⚠️ Complete todos los campos obligatorios.</p>
-        }
-      </form>
-    </div>
-  </div>
-
-  <!-- ═══════════════ PARTS TABLE (FICHA TÉCNICA) ═══════════════ -->
-  <div class="sheet-card">
-    <div class="sheet-header">
-      <div class="sheet-title-row">
-        <span class="sheet-icon">📑</span>
-        <h2>Ficha Técnica — Repuestos</h2>
+    <div class="form-container">
+      <div class="form-group">
+        <label>ID Repuesto <span class="required">*</span></label>
+        <input type="number" [(ngModel)]="idRepuesto" name="idRepuesto" placeholder="Ej: 9101" min="1" />
       </div>
-      <span class="sheet-machine-tag">{{ filteredRepuestos().length }} registros</span>
-    </div>
 
-    @if (filteredRepuestos().length > 0) {
-    <div class="table-container">
-      <table class="parts-table">
-        <thead>
-          <tr>
-            <th class="col-num">#</th>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Unidad</th>
-            <th>Stock</th>
-            <th>Precio Unit.</th>
-            <th>Ubicación</th>
-            <th>Proveedor</th>
-            <th class="col-actions">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (r of filteredRepuestos(); track r.id; let i = $index) {
-          @if (editingInlineId() === r.id) {
-          <tr class="editing-row">
-            <td class="col-num">{{ i + 1 }}</td>
-            <td><input class="inline-input" [(ngModel)]="inlineData.codigo" [ngModelOptions]="{standalone: true}" />
-            </td>
-            <td><input class="inline-input" [(ngModel)]="inlineData.nombre" [ngModelOptions]="{standalone: true}" />
-            </td>
-            <td><input class="inline-input" [(ngModel)]="inlineData.categoria" [ngModelOptions]="{standalone: true}" />
-            </td>
-            <td><input class="inline-input" [(ngModel)]="inlineData.unidadMedida"
-                [ngModelOptions]="{standalone: true}" /></td>
-            <td><input class="inline-input" type="number" [(ngModel)]="inlineData.cantidadStock"
-                [ngModelOptions]="{standalone: true}" /></td>
-            <td><input class="inline-input" type="number" [(ngModel)]="inlineData.precioUnitario"
-                [ngModelOptions]="{standalone: true}" /></td>
-            <td><input class="inline-input" [(ngModel)]="inlineData.ubicacion" [ngModelOptions]="{standalone: true}" />
-            </td>
-            <td><input class="inline-input" [(ngModel)]="inlineData.proveedor" [ngModelOptions]="{standalone: true}" />
-            </td>
-            <td class="col-actions">
-              <div class="action-group">
-                <button class="btn-save-inline" title="Guardar" (click)="saveInlineEdit()">✅</button>
-                <button class="btn-cancel-inline" title="Cancelar" (click)="cancelInlineEdit()">❌</button>
-              </div>
-            </td>
-          </tr>
-          } @else {
-          <tr>
-            <td class="col-num">{{ i + 1 }}</td>
-            <td><code>{{ r.codigo }}</code></td>
-            <td>{{ r.nombre }}</td>
-            <td>{{ r.categoria }}</td>
-            <td>{{ r.unidadMedida }}</td>
-            <td>{{ r.cantidadStock }}</td>
-            <td>$ {{ r.precioUnitario.toFixed(2) }}</td>
-            <td>{{ r.ubicacion }}</td>
-            <td>{{ r.proveedor }}</td>
-            <td class="col-actions">
-              <div class="action-group">
-                <button class="btn-edit" title="Editar" (click)="startInlineEdit(r)">✏️</button>
-                <button class="btn-delete" title="Eliminar" (click)="deletingId.set(r.id)">🗑️</button>
-              </div>
-            </td>
-          </tr>
-          }
-          }
-        </tbody>
-      </table>
+      <div class="form-group">
+        <label>Código Parte <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="codiPart" name="codiPart" placeholder="Ej: PM100-ROD-01" />
+        <button type="button" class="btn-inline-search" (click)="togglePartSelector()">
+          {{ showPartSelector ? 'Ocultar partes' : 'Buscar parte' }}
+        </button>
+
+        @if (showPartSelector) {
+          <div class="part-selector-panel">
+            <input
+              type="text"
+              [(ngModel)]="partSearchTerm"
+              name="partSearchTerm"
+              placeholder="Buscar por código o nombre" />
+
+            <div class="part-selector-results">
+              @for (item of filteredPartResults; track item.CodiPart) {
+                <button type="button" class="part-selector-item" (click)="selectPart(item)">
+                  <strong>{{ item.CodiPart }}</strong>
+                  <span>{{ item.NombreParte || 'Sin nombre' }}</span>
+                </button>
+              } @empty {
+                <p class="part-selector-empty">No se encontraron partes.</p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Cantidad <span class="required">*</span></label>
+        <input type="number" [(ngModel)]="cantid" name="cantid" placeholder="Ej: 7" min="1" />
+      </div>
+
+      <div class="form-group">
+        <label>Nombre Parte</label>
+        <input type="text" [ngModel]="nombreParte" name="nombreParte" readonly placeholder="Se carga al consultar" />
+      </div>
     </div>
-    <div class="table-footer">
-      Total: {{ filteredRepuestos().length }} repuestos registrados
+  </section>
+
+  <section class="actions-panel">
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="clearForm()">Limpiar</button>
+
+      @if (idRepuesto === null) {
+        <button type="button" class="btn-primary" (click)="handleRepuesto(1)">
+          <span class="button-icon">💾</span>
+          Crear Repuesto
+        </button>
+      }
+
+      @if (idRepuesto !== null) {
+        <button type="button" class="btn-primary" (click)="handleRepuesto(3)">
+          <span class="button-icon">💾</span>
+          Guardar Cambios
+        </button>
+        <button type="button" class="btn-danger" (click)="handleRepuesto(2)">
+          <span class="button-icon">🗑️</span>
+          Eliminar
+        </button>
+      }
     </div>
-    } @else {
-    <div class="empty-state">
-      <span class="empty-icon">📦</span>
-      <p>No se encontraron repuestos. Registre uno nuevo usando el formulario superior.</p>
-    </div>
-    }
-  </div>
+  </section>
 </div>
 
-<!-- ═══════════════ DELETE CONFIRMATION MODAL ═══════════════ -->
-@if (deletingId() !== null) {
-<div class="modal-overlay" (click)="deletingId.set(null)">
-  <div class="modal-box" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <span class="modal-icon">⚠️</span>
-      <h3>Confirmar Eliminación</h3>
-    </div>
-    <p class="modal-message">
-      ¿Está seguro de que desea eliminar el repuesto
-      <code>{{ getDeletingRepuesto()?.codigo }}</code>?
-    </p>
-    <p class="modal-warning">Esta acción no se puede deshacer.</p>
-    <div class="modal-actions">
-      <button class="btn-modal-cancel" (click)="deletingId.set(null)">Cancelar</button>
-      <button class="btn-modal-confirm" (click)="confirmDelete(deletingId()!)">Eliminar</button>
-    </div>
-  </div>
-</div>
+@if (showModal) {
+  <app-repuestos-modal
+    (close)="closeModal()"
+    (select)="onSelectRepuesto($event)">
+  </app-repuestos-modal>
 }

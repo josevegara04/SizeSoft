@@ -1,0 +1,77 @@
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <span class="modal-kicker">Consulta de maestros</span>
+        <h2>{{ modalTitle }}</h2>
+      </div>
+      <button type="button" class="icon-close" (click)="cerrarModal()" title="Cerrar">✕</button>
+    </div>
+
+    <section class="results-panel">
+      <div class="results-header">
+        <div>
+          <span class="modal-kicker">Resultados</span>
+          <h3>{{ modalSubtitle }}</h3>
+        </div>
+        <span class="count-pill">{{ filteredResults.length }} registros</span>
+      </div>
+
+      <div class="modal-table">
+        <table>
+          <thead>
+            <tr>
+              @for (column of columns; track column.key) {
+                <th>{{ column.label }}</th>
+              }
+            </tr>
+
+            <tr class="filters-row">
+              @for (column of columns; track column.key) {
+                <th>
+                  <input type="text" placeholder="Filtrar" [(ngModel)]="filters[column.key]" />
+                </th>
+              }
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (item of filteredResults; track $index) {
+              <tr (click)="selectRow(item)">
+                @for (column of columns; track column.key) {
+                  <td>
+                    @if (column.type === 'status') {
+                      <span class="status-pill" [class.inactive]="formatActivo(item[column.key]) === 'No'">
+                        {{ formatActivo(item[column.key]) }}
+                      </span>
+                    } @else if (column.type === 'code') {
+                      <code>{{ formatCell(item, column) }}</code>
+                    } @else {
+                      {{ formatCell(item, column) }}
+                    }
+                  </td>
+                }
+              </tr>
+            }
+
+            @if (results.length === 0) {
+              <tr>
+                <td [attr.colspan]="columns.length" class="no-data">
+                  {{ emptyMessage }}
+                </td>
+              </tr>
+            }
+
+            @if (results.length > 0 && filteredResults.length === 0) {
+              <tr>
+                <td [attr.colspan]="columns.length" class="no-data">
+                  No hay coincidencias con los filtros aplicados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>

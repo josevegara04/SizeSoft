@@ -32,13 +32,52 @@ export class MantenimientosComponent {
     this.showModal = false;
   }
 
+  onSelectMaintenance(item: any): void {
+    this.idMantenimiento = Number(item.idMantenimiento ?? item.IdMantenimiento ?? 0);
+    this.nombre = item.nombre ?? item.Nombre ?? '';
+    this.Descripcion = item.Descripcion ?? '';
+    this.CodiMaqu = item.CodiMaqu ?? '';
+    this.tiempoDias = Number(item.tiempoDias ?? 0);
+    this.TipoMant = item.TipoMant ?? '';
+    this.showMachineSelector = false;
+    this.machineSearchTerm = '';
+    this.closeModal();
+  }
+
   // Main variables
   idMantenimiento: number = 0;
   nombre: string = '';
   Descripcion: string = '';
   CodiMaqu: string = '';
+  showMachineSelector = false;
+  machineSearchTerm = '';
+  machineResults: any[] = [];
   tiempoDias: number = 0;
   TipoMant: string = '';
+
+  toggleMachineSelector(): void {
+    this.showMachineSelector = !this.showMachineSelector;
+    if (this.showMachineSelector && this.machineResults.length === 0) {
+      this.loadMachines();
+    }
+  }
+
+  get filteredMachineResults(): any[] {
+    const term = this.machineSearchTerm.trim().toLowerCase();
+    if (!term) {
+      return this.machineResults;
+    }
+
+    return this.machineResults.filter(item =>
+      item.CodiMaqu?.toLowerCase().includes(term)
+    );
+  }
+
+  selectMachine(item: any): void {
+    this.CodiMaqu = item.CodiMaqu ?? '';
+    this.machineSearchTerm = '';
+    this.showMachineSelector = false;
+  }
 
   // Create or update machine part
   handleMaintenance(action: number) {
@@ -60,6 +99,8 @@ export class MantenimientosComponent {
       TipoMant: this.TipoMant,
     
       CodiComp: this.apiService.clsUser.CodiComp,
+      CodiUsua: this.apiService.clsUser.Id,
+      NombUsua: this.apiService.clsUser.NombUsua,
       Entidad: 301,
 
       Token: this.apiService.lstrToken,
@@ -69,12 +110,46 @@ export class MantenimientosComponent {
     this.MantenimientosService.saveMaintenance(body).subscribe({
 
       next: (res) => {
-        const message = res[0]?.Messag || 'Operación completada';
-        this.sidebarService.addLog(message);
+        this.sidebarService.addLog(this.extractMessage(res, 'Operación completada'));
       },
       error: (err) => {
         this.sidebarService.addLog('Error al realizar la operación');
       }
     });
+  }
+
+  private loadMachines(): void {
+    const body = [{
+      CodiCons: 'MaquMant',
+      NombPara: 'Codigo Compañia',
+      Valor: this.apiService.clsUser.CodiComp,
+      CodiComp: this.apiService.clsUser.CodiComp,
+      Token: this.apiService.lstrToken,
+      Report: '0'
+    }];
+
+    this.MantenimientosService.search(body).subscribe({
+      next: (res) => {
+        this.machineResults = Array.isArray(res) ? res : [];
+      },
+      error: () => {
+        this.machineResults = [];
+        this.sidebarService.addLog('No se pudieron cargar las máquinas');
+      }
+    });
+  }
+
+  private extractMessage(response: any, fallback: string): string {
+    const rawMessage = response?.[0]?.Messag ?? response?.[0]?.message;
+    if (!rawMessage) {
+      return fallback;
+    }
+
+    try {
+      const parsed = JSON.parse(rawMessage);
+      return parsed?.message || rawMessage;
+    } catch {
+      return rawMessage;
+    }
   }
 }

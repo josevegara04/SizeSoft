@@ -110,8 +110,7 @@ export class MantenimientosComponent {
     this.MantenimientosService.saveMaintenance(body).subscribe({
 
       next: (res) => {
-        const message = res[0]?.Messag || 'Operación completada';
-        this.sidebarService.addLog(message);
+        this.sidebarService.addLog(this.extractMessage(res, 'Operación completada'));
       },
       error: (err) => {
         this.sidebarService.addLog('Error al realizar la operación');
@@ -138,5 +137,19 @@ export class MantenimientosComponent {
         this.sidebarService.addLog('No se pudieron cargar las máquinas');
       }
     });
+  }
+
+  private extractMessage(response: any, fallback: string): string {
+    const rawMessage = response?.[0]?.Messag ?? response?.[0]?.message;
+    if (!rawMessage) {
+      return fallback;
+    }
+
+    try {
+      const parsed = JSON.parse(rawMessage);
+      return parsed?.message || rawMessage;
+    } catch {
+      return rawMessage;
+    }
   }
 }

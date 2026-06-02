@@ -286,7 +286,6 @@ export class ApiService {
   //Función para cerrar las sesiones del usuario en la aplicación
   fnClose() {
     //Cerrar la sesión en la BDD
-    console.log('TOKEN ANTES DE CERRAR:', this.lstrToken);
     this.lboolCerrSesi = true;
     this.Query = '';
     this.clsQuery = [];
